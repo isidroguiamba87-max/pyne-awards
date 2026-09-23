@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy: #13263d;
+  --color-navy-deep: #0c1a2b;
+  --color-navy-soft: #1b3350;
+  --color-navy-line: #2a4666;
+  --color-gold: #fdc91c;
+  --color-gold-soft: #fde28a;
+  --color-red: #c12128;
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+html {
+  background: var(--color-navy);
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--color-navy);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 2px;
+}
+
+@keyframes pop-in {
+  from { opacity: 0; transform: scale(0.92) translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.animate-pop-in { animation: pop-in 0.45s ease-out both; }
+
+@keyframes live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.animate-live { animation: live-pulse 1.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in, .animate-live { animation: none; }
+}
+
+/* Motivo decorativo discreto (linhas douradas) para o hero */
+.hero-bg {
+  background:
+    radial-gradient(ellipse at 85% 0%, rgba(253, 201, 28, 0.16), transparent 55%),
+    radial-gradient(ellipse at 0% 100%, rgba(193, 33, 40, 0.14), transparent 50%),
+    var(--color-navy);
+}
