@@ -140,10 +140,10 @@ function Uploader() {
 
   const dayEvents = events.filter((e) => e.day === day)
   const doneCount = jobs.filter((j) => j.status === 'done').length
-  const field = 'mt-1.5 w-full rounded-xl border border-navy-line bg-navy-deep px-3 py-3 text-white focus:border-gold focus:outline-none'
+  const field = 'mt-1.5 w-full rounded-xl border border-paper-line bg-paper px-3 py-3 text-ink focus:border-gold focus:outline-none'
 
   return (
-    <section className="rounded-2xl border border-navy-line bg-navy-soft/60 p-5">
+    <section className="rounded-2xl border border-paper-line bg-white shadow-sm p-5">
       <h2 className="font-serif text-2xl font-bold">{t('admin.upload.title')}</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-[10rem_1fr]">
         <label className="text-sm font-medium">
@@ -186,9 +186,9 @@ function Uploader() {
           drag ? 'border-gold bg-gold/10' : 'border-gold/50 hover:bg-gold/5'
         }`}
       >
-        <IconUpload className="h-8 w-8 text-gold" />
-        <span className="font-semibold text-gold">{t('admin.upload.pick')}</span>
-        <span className="text-sm text-white/65">{t('admin.upload.drop')}</span>
+        <IconUpload className="h-8 w-8 text-gold-deep" />
+        <span className="font-semibold text-gold-deep">{t('admin.upload.pick')}</span>
+        <span className="text-sm text-ink-soft">{t('admin.upload.drop')}</span>
       </button>
       <input
         ref={inputRef}
@@ -204,37 +204,37 @@ function Uploader() {
 
       {jobs.length > 0 && (
         <>
-          <div className="mt-4 flex items-center justify-between text-sm text-white/70">
+          <div className="mt-4 flex items-center justify-between text-sm text-ink-soft">
             <span>
-              {doneCount}/{jobs.length} <IconCheck className="inline h-4 w-4 text-gold" />
+              {doneCount}/{jobs.length} <IconCheck className="inline h-4 w-4 text-gold-deep" />
             </span>
             {doneCount > 0 && (
-              <button onClick={clearDone} className="rounded-lg px-3 py-1.5 hover:bg-white/10">
+              <button onClick={clearDone} className="rounded-lg px-3 py-1.5 hover:bg-paper">
                 {t('admin.upload.clear')}
               </button>
             )}
           </div>
           <ul className="mt-2 space-y-2">
             {jobs.map((j) => (
-              <li key={j.id} className="flex items-center gap-3 rounded-xl bg-navy-deep/70 p-2">
+              <li key={j.id} className="flex items-center gap-3 rounded-xl bg-paper p-2">
                 <img src={j.preview} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
                 <div className="min-w-0 flex-1">
                   <div className="flex justify-between gap-2 text-sm">
                     <span className="truncate">{j.file.name}</span>
-                    <span className={`shrink-0 font-semibold ${j.status === 'error' ? 'text-red' : j.status === 'done' ? 'text-gold' : 'text-white/70'}`}>
+                    <span className={`shrink-0 font-semibold ${j.status === 'error' ? 'text-red' : j.status === 'done' ? 'text-gold-deep' : 'text-ink-soft'}`}>
                       {t(`admin.status.${j.status}`)}
                     </span>
                   </div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/10">
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-paper-line">
                     <div
                       className={`h-full rounded-full transition-all ${j.status === 'error' ? 'bg-red' : 'bg-gold'}`}
                       style={{ width: `${j.status === 'error' ? 100 : j.progress}%` }}
                     />
                   </div>
-                  {j.error && <p className="mt-1 truncate text-xs text-white/60">{j.error}</p>}
+                  {j.error && <p className="mt-1 truncate text-xs text-ink-soft">{j.error}</p>}
                 </div>
                 {j.status === 'error' && (
-                  <button onClick={() => update(j.id, { status: 'queued', progress: 0, error: undefined })} className="shrink-0 rounded-lg border border-gold px-2 py-1 text-xs text-gold">
+                  <button onClick={() => update(j.id, { status: 'queued', progress: 0, error: undefined })} className="shrink-0 rounded-lg border border-gold px-2 py-1 text-xs text-gold-deep">
                     {t('retry')}
                   </button>
                 )}
@@ -286,25 +286,25 @@ function Published() {
   return (
     <section className="mt-8">
       <h2 className="font-serif text-2xl font-bold">
-        {t('admin.photos.recent')} <span className="text-base font-normal text-white/60">({photos.length})</span>
+        {t('admin.photos.recent')} <span className="text-base font-normal text-ink-soft">({photos.length})</span>
       </h2>
       <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
         {photos.map((p) => (
-          <li key={p.id} className="overflow-hidden rounded-xl border border-navy-line bg-navy-soft/60">
+          <li key={p.id} className="overflow-hidden rounded-xl border border-paper-line bg-white shadow-sm">
             <div className="relative aspect-square">
               <img src={publicUrl(p.thumb_path)} alt="" loading="lazy" className={`h-full w-full object-cover ${p.hidden ? 'opacity-30 grayscale' : ''}`} />
               {p.hidden && (
-                <span className="absolute top-2 left-2 rounded-full bg-red px-2 py-0.5 text-xs font-bold">{t('admin.photos.hidden')}</span>
+                <span className="absolute top-2 left-2 rounded-full bg-red px-2 py-0.5 text-xs font-bold text-white">{t('admin.photos.hidden')}</span>
               )}
             </div>
-            <p className="truncate px-2 pt-1.5 text-xs text-white/60">
+            <p className="truncate px-2 pt-1.5 text-xs text-ink-soft">
               {p.day ? `${t('gallery.day')} ${p.day}` : ''} · {L(eventById(p.event_id)?.title)}
             </p>
             <div className="grid grid-cols-2 gap-1 p-2">
-              <button onClick={() => toggle(p)} className="rounded-lg border border-navy-line py-1.5 text-xs font-semibold hover:border-gold">
+              <button onClick={() => toggle(p)} className="rounded-lg border border-paper-line py-1.5 text-xs font-semibold hover:border-gold">
                 {p.hidden ? t('admin.photos.show') : t('admin.photos.hide')}
               </button>
-              <button onClick={() => setConfirm(p)} className="rounded-lg border border-red/60 py-1.5 text-xs font-semibold text-white hover:bg-red">
+              <button onClick={() => setConfirm(p)} className="rounded-lg border border-red/60 py-1.5 text-xs font-semibold text-red hover:bg-red hover:text-white">
                 {t('admin.photos.delete')}
               </button>
             </div>

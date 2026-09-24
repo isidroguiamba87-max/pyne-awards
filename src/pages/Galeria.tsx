@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { IconArrowUp } from '../components/Icons'
+import { IconArrowUp, IconImage } from '../components/Icons'
 import Lightbox from '../components/Lightbox'
+import PageHeader from '../components/PageHeader'
 import { useI18n } from '../i18n'
 import { days } from '../lib/programa'
 import { publicUrl, supabase, type Photo } from '../lib/supabase'
@@ -9,7 +10,7 @@ const PAGE = 40
 
 export function Offline() {
   const { t } = useI18n()
-  return <p className="rounded-xl border border-navy-line bg-navy-soft/60 p-5 text-white/75">{t('offline')}</p>
+  return <p className="rounded-2xl bg-white p-5 text-ink-soft shadow-sm ring-1 ring-paper-line">{t('offline')}</p>
 }
 
 export default function Galeria() {
@@ -113,24 +114,24 @@ export default function Galeria() {
   ]
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-8">
-      <h1 className="font-serif text-4xl font-bold">{t('gallery.title')}</h1>
-      <p className="mt-1 text-white/70">{t('gallery.sub')}</p>
+    <>
+    <PageHeader kicker="Pyne Awards Africa 2026" title={t('gallery.title')} sub={t('gallery.sub')} />
+    <div className="mx-auto max-w-6xl px-4">
 
       {!supabase ? (
-        <div className="mt-6">
+        <div className="mt-8">
           <Offline />
         </div>
       ) : (
         <>
-          <div className="sticky top-16 z-30 -mx-4 mt-4 flex gap-2 overflow-x-auto bg-navy/95 px-4 py-3 backdrop-blur" role="group">
+          <div className="sticky top-16 z-30 -mx-4 flex gap-2 overflow-x-auto border-b border-paper-line/70 bg-paper/90 px-4 py-3 backdrop-blur-md" role="group">
             {filters.map((f) => (
               <button
                 key={String(f.v)}
                 onClick={() => setDay(f.v)}
                 aria-pressed={day === f.v}
-                className={`shrink-0 rounded-full border px-4 py-2 text-sm font-semibold ${
-                  day === f.v ? 'border-gold bg-gold text-navy' : 'border-navy-line text-white/80 hover:border-gold/50'
+                className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition ${
+                  day === f.v ? 'bg-navy text-gold shadow-md ring-2 ring-gold' : 'bg-white text-ink shadow-sm ring-1 ring-paper-line hover:ring-gold'
                 }`}
               >
                 {f.label}
@@ -151,12 +152,12 @@ export default function Galeria() {
             </button>
           )}
 
-          <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+          <div className="mt-4 grid grid-cols-2 gap-2 sm:gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             {photos.map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => setOpen(i)}
-                className={`group relative aspect-square overflow-hidden rounded-lg bg-navy-soft ${fresh.has(p.id) ? 'animate-pop-in ring-2 ring-gold' : ''}`}
+                className={`group relative aspect-square overflow-hidden rounded-xl bg-white shadow-sm ring-1 ${fresh.has(p.id) ? 'animate-pop-in ring-2 ring-gold' : 'ring-paper-line'}`}
               >
                 <img
                   src={publicUrl(p.thumb_path)}
@@ -168,20 +169,27 @@ export default function Galeria() {
             ))}
           </div>
 
-          {!loading && !error && photos.length === 0 && <p className="mt-10 text-center text-white/70">{t('gallery.empty')}</p>}
+          {!loading && !error && photos.length === 0 && (
+            <div className="mx-auto mt-8 max-w-md rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-paper-line">
+              <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-navy text-gold">
+                <IconImage className="h-7 w-7" />
+              </span>
+              <p className="mt-4 text-ink-soft">{t('gallery.empty')}</p>
+            </div>
+          )}
           {error && (
             <div className="mt-8 text-center">
-              <p className="text-white/75">{t('loadError')}</p>
-              <button onClick={() => load(photos.length, day)} className="mt-3 rounded-xl border border-gold px-4 py-2 font-semibold text-gold">
+              <p className="text-ink-soft">{t('loadError')}</p>
+              <button onClick={() => load(photos.length, day)} className="mt-3 rounded-xl bg-navy px-4 py-2 font-semibold text-gold">
                 {t('retry')}
               </button>
             </div>
           )}
           <div ref={sentinel} className="h-4" />
-          {loading && <p className="py-6 text-center text-white/60">{t('gallery.loading')}</p>}
+          {loading && <p className="py-6 text-center text-ink-soft">{t('gallery.loading')}</p>}
           {!loading && hasMore && photos.length > 0 && (
             <div className="text-center">
-              <button onClick={() => load(photos.length, day)} className="rounded-xl border border-gold px-5 py-2.5 font-semibold text-gold hover:bg-gold/10">
+              <button onClick={() => load(photos.length, day)} className="rounded-xl bg-navy px-5 py-2.5 font-semibold text-gold shadow-md hover:bg-navy-soft">
                 {t('gallery.more')}
               </button>
             </div>
@@ -191,5 +199,6 @@ export default function Galeria() {
 
       {open !== null && photos[open] && <Lightbox photos={photos} index={open} onIndex={setOpen} onClose={() => setOpen(null)} />}
     </div>
+    </>
   )
 }

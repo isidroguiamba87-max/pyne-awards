@@ -1,14 +1,24 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Link, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import { useI18n } from './i18n'
-import Admin from './pages/admin/Admin'
 import Agenda from './pages/Agenda'
-import Ecra from './pages/Ecra'
-import Galeria from './pages/Galeria'
 import Home from './pages/Home'
-import Perguntas from './pages/Perguntas'
-import QR from './pages/QR'
+
+// Início e Agenda carregam logo (é o que se abre pelo QR); o resto só quando é preciso
+const Admin = lazy(() => import('./pages/admin/Admin'))
+const Ecra = lazy(() => import('./pages/Ecra'))
+const Galeria = lazy(() => import('./pages/Galeria'))
+const Perguntas = lazy(() => import('./pages/Perguntas'))
+const QR = lazy(() => import('./pages/QR'))
+
+function Loading() {
+  return (
+    <div className="flex justify-center py-24" role="status" aria-label="…">
+      <span className="h-8 w-8 animate-spin rounded-full border-2 border-gold/30 border-t-gold" />
+    </div>
+  )
+}
 
 function NotFound() {
   const { t } = useI18n()
@@ -45,6 +55,7 @@ export default function App() {
   }, [pathname, t])
 
   return (
+    <Suspense fallback={<Loading />}>
     <Routes>
       <Route path="/ecra" element={<Ecra />} />
       <Route element={<Layout />}>
@@ -57,5 +68,6 @@ export default function App() {
         <Route path="*" element={<NotFound />} />
       </Route>
     </Routes>
+    </Suspense>
   )
 }

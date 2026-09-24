@@ -65,7 +65,7 @@ export default function AdminPerguntas({ active }: { active: boolean }) {
               aria-selected={tab === s}
               onClick={() => setTab(s)}
               className={`relative shrink-0 rounded-full border px-4 py-2 text-sm font-semibold ${
-                tab === s ? 'border-gold bg-gold text-navy' : 'border-navy-line text-white/80'
+                tab === s ? 'border-gold bg-gold text-navy' : 'border-paper-line text-ink-soft'
               }`}
             >
               {t(`admin.q.${s}`)} <span className="tabular-nums opacity-70">({counts[s]})</span>
@@ -75,28 +75,28 @@ export default function AdminPerguntas({ active }: { active: boolean }) {
             </button>
           ))}
         </div>
-        <Link to="/ecra" target="_blank" className="text-sm font-semibold text-gold underline-offset-4 hover:underline">
+        <Link to="/ecra" target="_blank" className="text-sm font-semibold text-gold-deep underline-offset-4 hover:underline">
           {t('admin.q.screen')} ↗
         </Link>
       </div>
 
-      {list.length === 0 && <p className="mt-8 text-center text-white/60">{t('admin.q.empty')}</p>}
+      {list.length === 0 && <p className="mt-8 text-center text-ink-soft">{t('admin.q.empty')}</p>}
 
       <ul className="mt-4 space-y-3">
         {list.map((q) => {
           const ev = eventById(q.event_id)
           return (
-            <li key={q.id} className={`rounded-2xl border p-4 ${q.pinned ? 'border-gold bg-gold/10' : 'border-navy-line bg-navy-soft/60'}`}>
+            <li key={q.id} className={`rounded-2xl border p-4 ${q.pinned ? 'border-gold bg-gold/10' : 'border-paper-line bg-white shadow-sm'}`}>
               <div className="flex gap-3">
                 <div className="min-w-0 flex-1">
                   <p className="text-lg leading-snug break-words">{q.body}</p>
-                  <p className="mt-1 text-sm text-white/55">
+                  <p className="mt-1 text-sm text-ink-soft">
                     {q.author_name || t('q.anon')} · {new Date(q.created_at).toLocaleTimeString('pt-PT', { timeZone: 'Africa/Maputo', hour: '2-digit', minute: '2-digit' })}
-                    {ev && <> · <span className="text-gold/80">{L(ev.title)}</span></>}
+                    {ev && <> · <span className="text-gold-deep">{L(ev.title)}</span></>}
                     {q.lang && <> · {q.lang.toUpperCase()}</>}
                   </p>
                 </div>
-                <div className="flex shrink-0 flex-col items-center text-sm font-bold text-gold tabular-nums" title={t('admin.q.votes')}>
+                <div className="flex shrink-0 flex-col items-center text-sm font-bold text-gold-deep tabular-nums" title={t('admin.q.votes')}>
                   <IconThumb className="h-5 w-5" />
                   {q.votes}
                 </div>
@@ -108,21 +108,21 @@ export default function AdminPerguntas({ active }: { active: boolean }) {
                   </button>
                 )}
                 {q.status !== 'answered' && q.status !== 'rejected' && (
-                  <button onClick={() => patch(q, { status: 'answered', pinned: false })} className={`${btn} border border-white/30 hover:bg-white/10`}>
+                  <button onClick={() => patch(q, { status: 'answered', pinned: false })} className={`${btn} border border-paper-line hover:bg-paper`}>
                     {t('admin.q.answer')}
                   </button>
                 )}
                 {(q.status === 'approved' || q.pinned) && (
                   <button
                     onClick={() => patch(q, { pinned: !q.pinned })}
-                    className={`${btn} inline-flex items-center gap-1.5 border border-gold text-gold hover:bg-gold/10`}
+                    className={`${btn} inline-flex items-center gap-1.5 border border-gold text-gold-deep hover:bg-gold/10`}
                   >
                     <IconStar className={`h-4 w-4 ${q.pinned ? 'fill-gold' : ''}`} />
                     {q.pinned ? t('admin.q.unpin') : t('admin.q.pin')}
                   </button>
                 )}
                 {q.status !== 'rejected' && (
-                  <button onClick={() => patch(q, { status: 'rejected', pinned: false })} className={`${btn} border border-red/70 hover:bg-red`}>
+                  <button onClick={() => patch(q, { status: 'rejected', pinned: false })} className={`${btn} border border-red/70 text-red hover:bg-red hover:text-white`}>
                     {t('admin.q.reject')}
                   </button>
                 )}

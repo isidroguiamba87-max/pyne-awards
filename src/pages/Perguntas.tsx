@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { IconStar, IconThumb } from '../components/Icons'
+import PageHeader from '../components/PageHeader'
 import { useToast } from '../components/Toast'
 import { useI18n } from '../i18n'
 import { eventById, events } from '../lib/programa'
@@ -54,16 +55,17 @@ function AskForm() {
     return () => window.clearTimeout(id)
   }, [sent])
 
-  const field = 'mt-1.5 w-full rounded-xl border border-navy-line bg-navy-deep px-4 py-3 text-base text-white placeholder:text-white/40 focus:border-gold focus:outline-none'
+  const field = 'mt-1.5 w-full rounded-xl border border-paper-line bg-paper px-4 py-3 text-base text-ink placeholder:text-ink-soft/60 focus:border-gold focus:bg-white focus:ring-2 focus:ring-gold/30 focus:outline-none'
 
   return (
-    <form onSubmit={submit} className="rounded-2xl border border-gold/30 bg-navy-soft/70 p-5 md:p-6">
+    <form onSubmit={submit} className="relative overflow-hidden rounded-3xl bg-white p-5 text-ink shadow-[0_20px_60px_-20px_rgba(19,38,61,0.35)] ring-1 ring-paper-line md:p-7">
+      <div className="bg-gold-grad absolute inset-x-0 top-0 h-1.5" aria-hidden />
       <div className="grid gap-4 sm:grid-cols-2">
-        <label className="block text-sm font-medium text-white/85">
+        <label className="block text-sm font-semibold text-ink">
           {t('q.name')}
           <input className={field} value={name} maxLength={60} onChange={(e) => setName(e.target.value)} placeholder={t('q.name.ph')} autoComplete="name" />
         </label>
-        <label className="block text-sm font-medium text-white/85">
+        <label className="block text-sm font-semibold text-ink">
           {t('q.session')}
           <select className={field} value={session} onChange={(e) => setSession(e.target.value)}>
             {events.map((ev) => (
@@ -74,7 +76,7 @@ function AskForm() {
           </select>
         </label>
       </div>
-      <label className="mt-4 block text-sm font-medium text-white/85">
+      <label className="mt-4 block text-sm font-semibold text-ink">
         {t('q.body')}
         <textarea
           className={`${field} min-h-32 resize-y`}
@@ -85,14 +87,14 @@ function AskForm() {
           placeholder={t('q.body.ph')}
         />
       </label>
-      <div className="mt-1 text-right text-xs text-white/55 tabular-nums">
+      <div className="mt-1 text-right text-xs text-ink-soft tabular-nums">
         {body.length}/{MAX}
       </div>
-      {sent && <p className="animate-pop-in mt-2 rounded-lg bg-gold/15 px-4 py-3 text-sm text-gold">{t('q.thanks')}</p>}
+      {sent && <p className="animate-pop-in mt-2 rounded-lg bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 ring-1 ring-emerald-200">{t('q.thanks')}</p>}
       <button
         type="submit"
         disabled={sending}
-        className="mt-4 w-full rounded-xl bg-gold px-5 py-3.5 text-lg font-semibold text-navy hover:brightness-105 disabled:opacity-60"
+        className="mt-4 w-full rounded-xl bg-navy px-5 py-3.5 text-lg font-semibold text-gold shadow-lg shadow-navy/20 transition hover:bg-navy-soft disabled:opacity-60"
       >
         {sending ? t('q.sending') : t('q.send')}
       </button>
@@ -123,9 +125,9 @@ export default function Perguntas() {
   const shown = filter ? items.filter((q) => q.event_id === filter) : items
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-8">
-      <h1 className="font-serif text-4xl font-bold">{t('q.title')}</h1>
-      <p className="mt-1 mb-6 text-white/70">{t('q.sub')}</p>
+    <>
+    <PageHeader kicker="Q&A · Live" title={t('q.title')} sub={t('q.sub')} />
+    <div className="mx-auto max-w-3xl px-4 pt-6">
 
       {!supabase ? (
         <Offline />
@@ -134,12 +136,12 @@ export default function Perguntas() {
           <AskForm />
 
           <div className="mt-10 flex flex-wrap items-end justify-between gap-3">
-            <h2 className="font-serif text-2xl font-bold">{t('q.list')}</h2>
+            <h2 className="font-serif text-2xl font-bold text-ink">{t('q.list')}</h2>
             <select
               aria-label={t('q.session')}
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
-              className="max-w-full rounded-lg border border-navy-line bg-navy-deep px-3 py-2 text-sm text-white"
+              className="max-w-full rounded-lg border border-paper-line bg-white px-3 py-2 text-sm text-ink shadow-sm"
             >
               <option value="">{t('q.allSessions')}</option>
               {events.map((ev) => (
@@ -150,8 +152,8 @@ export default function Perguntas() {
             </select>
           </div>
 
-          {error && <p className="mt-4 text-white/70">{t('loadError')}</p>}
-          {!loading && !error && shown.length === 0 && <p className="mt-6 text-white/60">{t('q.empty')}</p>}
+          {error && <p className="mt-4 text-ink-soft">{t('loadError')}</p>}
+          {!loading && !error && shown.length === 0 && <p className="mt-6 rounded-2xl bg-white p-6 text-center text-ink-soft ring-1 ring-paper-line">{t('q.empty')}</p>}
 
           <ul className="mt-4 space-y-3">
             {shown.map((q) => {
@@ -162,7 +164,7 @@ export default function Perguntas() {
                 <li
                   key={q.id}
                   className={`flex gap-4 rounded-2xl border p-4 ${
-                    q.pinned ? 'border-gold bg-gold/10' : 'border-navy-line bg-navy-soft/60'
+                    q.pinned ? 'border-gold bg-gold/10 shadow-md' : 'border-paper-line bg-white shadow-sm'
                   } ${answered ? 'opacity-70' : ''}`}
                 >
                   <div className="min-w-0 flex-1">
@@ -172,12 +174,12 @@ export default function Perguntas() {
                           <IconStar className="h-3 w-3 fill-navy" /> {t('q.pinned')}
                         </span>
                       )}
-                      {answered && <span className="rounded-full bg-white/15 px-2 py-0.5 text-xs font-semibold">{t('q.answered')}</span>}
+                      {answered && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">{t('q.answered')}</span>}
                     </div>
-                    <p className="mt-1 text-lg leading-snug break-words text-white">{q.body}</p>
-                    <p className="mt-1.5 text-sm text-white/55">
+                    <p className="mt-1 text-lg leading-snug break-words text-ink">{q.body}</p>
+                    <p className="mt-1.5 text-sm text-ink-soft">
                       {q.author_name || t('q.anon')}
-                      {ev && <> · <span className="text-gold/80">{L(ev.title)}</span></>}
+                      {ev && <> · <span className="font-medium text-gold-deep">{L(ev.title)}</span></>}
                     </p>
                   </div>
                   <button
@@ -186,7 +188,7 @@ export default function Perguntas() {
                     aria-label={hasVoted ? t('q.voted') : t('q.vote')}
                     aria-pressed={hasVoted}
                     className={`flex h-16 w-14 shrink-0 flex-col items-center justify-center rounded-xl border text-sm font-bold tabular-nums transition ${
-                      hasVoted ? 'border-gold bg-gold text-navy' : 'border-navy-line text-white hover:border-gold disabled:opacity-50'
+                      hasVoted ? 'border-navy bg-navy text-gold' : 'border-paper-line bg-paper text-ink hover:border-gold disabled:opacity-50'
                     }`}
                   >
                     <IconThumb className="h-5 w-5" />
@@ -199,5 +201,6 @@ export default function Perguntas() {
         </>
       )}
     </div>
+    </>
   )
 }

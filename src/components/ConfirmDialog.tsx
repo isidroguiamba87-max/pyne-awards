@@ -27,12 +27,12 @@ export default function ConfirmDialog({ open, message, onConfirm, onCancel }: Pr
       <div
         role="alertdialog"
         aria-modal="true"
-        className="animate-pop-in w-full max-w-sm rounded-2xl border border-navy-line bg-navy-soft p-6 shadow-2xl"
+        className="animate-pop-in w-full max-w-sm rounded-2xl bg-white p-6 text-ink shadow-2xl ring-1 ring-paper-line"
         onClick={(e) => e.stopPropagation()}
       >
         <p className="text-lg">{message}</p>
         <div className="mt-6 flex justify-end gap-3">
-          <button ref={cancelRef} onClick={onCancel} className="rounded-lg px-4 py-2.5 font-medium text-white/80 hover:bg-white/10">
+          <button ref={cancelRef} onClick={onCancel} className="rounded-lg px-4 py-2.5 font-medium text-ink-soft hover:bg-paper">
             {t('cancel')}
           </button>
           <button onClick={onConfirm} className="rounded-lg bg-red px-4 py-2.5 font-semibold text-white hover:brightness-110">

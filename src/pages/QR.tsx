@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { QRCanvas, QRSvg } from '../components/PyneQR'
 import { IconDownload } from '../components/Icons'
+import PageHeader from '../components/PageHeader'
 import { useI18n } from '../i18n'
 import { SITE_URL } from '../lib/supabase'
 
@@ -40,23 +41,24 @@ export default function QR() {
   }
 
   return (
+    <>
+    <PageHeader kicker="Pyne Awards Africa 2026" title={t('qr.title')} sub={t('qr.caption.site')} />
     <div className="mx-auto max-w-xl px-4 pt-8 text-center">
-      <h1 className="font-serif text-4xl font-bold">{t('qr.title')}</h1>
 
-      <div className="mx-auto mt-5 inline-flex rounded-xl border border-navy-line p-1" role="group">
+      <div className="mx-auto inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-paper-line" role="group">
         {(['site', 'questions'] as const).map((k) => (
           <button
             key={k}
             onClick={() => setTarget(k)}
             aria-pressed={target === k}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold ${target === k ? 'bg-gold text-navy' : 'text-white/80'}`}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold ${target === k ? 'bg-navy text-gold' : 'text-ink-soft hover:text-ink'}`}
           >
             {t(k === 'site' ? 'qr.target.site' : 'qr.target.questions')}
           </button>
         ))}
       </div>
 
-      <div className="mx-auto mt-6 max-w-sm rounded-3xl bg-white p-5 text-navy shadow-2xl">
+      <div className="mx-auto mt-6 max-w-sm rounded-3xl bg-white p-5 text-navy shadow-[0_20px_60px_-20px_rgba(19,38,61,0.4)] ring-2 ring-gold">
         <QRSvg ref={svgRef} value={value} size={512} className="h-auto w-full" />
         <p className="mt-2 font-serif text-xl font-bold">The Pyne Awards Africa 2026</p>
         <p className="text-sm font-semibold tracking-wide text-red">
@@ -70,19 +72,20 @@ export default function QR() {
       </div>
 
       <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
-        <button onClick={downloadPng} className="inline-flex items-center justify-center gap-2 rounded-xl bg-gold px-5 py-3 font-semibold text-navy hover:brightness-105">
+        <button onClick={downloadPng} className="inline-flex items-center justify-center gap-2 rounded-xl bg-navy px-5 py-3 font-semibold text-gold shadow-md hover:bg-navy-soft">
           <IconDownload className="h-5 w-5" /> {t('qr.png')}
         </button>
-        <button onClick={downloadSvg} className="inline-flex items-center justify-center gap-2 rounded-xl border border-gold px-5 py-3 font-semibold text-gold hover:bg-gold/10">
+        <button onClick={downloadSvg} className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-3 font-semibold text-navy shadow-sm ring-1 ring-paper-line hover:ring-gold">
           <IconDownload className="h-5 w-5" /> {t('qr.svg')}
         </button>
       </div>
 
-      <p className="mt-6 text-sm text-white/60">
+      <p className="mt-6 text-sm text-ink-soft">
         {t('qr.hint')}
         <br />
-        <code className="break-all text-gold">{value}</code>
+        <code className="break-all font-semibold text-gold-deep">{value}</code>
       </p>
     </div>
+    </>
   )
 }

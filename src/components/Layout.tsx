@@ -30,7 +30,7 @@ export function LangSwitch() {
 export function Footer() {
   const { t } = useI18n()
   return (
-    <footer className="mt-16 border-t border-navy-line bg-[#14253d] pb-24 md:pb-0">
+    <footer className="border-t-2 border-gold/70 bg-[#14253d] pb-24 md:pb-0">
       <p className="pt-8 text-center text-xs uppercase tracking-[0.2em] text-white/60">{t('home.partners')}</p>
       <img
         src="/partners-banner.png"
@@ -38,7 +38,21 @@ export function Footer() {
         className="mx-auto aspect-[1400/377] w-full max-w-5xl object-cover md:aspect-[2480/377]"
         loading="lazy"
       />
-      <p className="pb-6 text-center text-xs text-white/50">© 2026 The Pyne Hospitality Company · Maputo</p>
+      <div className="flex flex-col items-center gap-1 px-4 pb-6 text-xs text-white/50">
+        <p>© 2026 The Pyne Hospitality Company · Maputo</p>
+        <a
+          href="https://www.smartbp.tech/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="group inline-flex items-center gap-1.5 transition hover:text-white/75"
+        >
+          <img src="/smartbp-logo.png" alt="" width={20} height={20} className="h-5 w-5 opacity-80 group-hover:opacity-100" loading="lazy" />
+          <span>
+            {t('footer.builtWith')} <span className="text-red/70">♥</span> {t('footer.by')}{' '}
+            <span className="font-medium text-white/65 group-hover:text-white/90">SmartBP Tech</span>
+          </span>
+        </a>
+      </div>
     </footer>
   )
 }
@@ -76,7 +90,7 @@ export default function Layout() {
         </div>
       </header>
 
-      <main id="main" className="flex-1">
+      <main id="main" className="flex-1 bg-paper pb-16 text-ink">
         <Outlet />
       </main>
 
