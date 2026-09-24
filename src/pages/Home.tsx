@@ -64,12 +64,12 @@ export default function Home() {
                 <br />
                 <span className="text-gold-grad">Africa</span> <span className="text-white/95">2026</span>
               </h1>
-              <div className="mt-4 flex flex-col gap-1.5 text-sm md:flex-row md:gap-5 md:text-lg">
+              <div className="mt-4 flex flex-col gap-1.5 text-sm font-semibold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_2px_14px_rgba(0,0,0,0.75)] md:flex-row md:gap-5 md:text-lg">
                 <span className="inline-flex items-center gap-2 font-medium">
                   <IconCalendar className="h-4 w-4 text-gold md:h-5 md:w-5" />
                   {t('home.dates')}
                 </span>
-                <span className="inline-flex items-center gap-2 text-white/75">
+                <span className="inline-flex items-center gap-2 text-white">
                   <IconPin className="h-4 w-4 text-gold md:h-5 md:w-5" />
                   {t('home.city')}
                 </span>
