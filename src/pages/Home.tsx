@@ -77,13 +77,13 @@ export default function Home() {
             </div>
           </div>
 
-          <div className="animate-fade-up mt-8 [animation-delay:240ms] [text-shadow:0_2px_10px_rgba(0,0,0,0.6)] md:mt-10">
+          <div className="animate-fade-up mt-8 [animation-delay:240ms] [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_2px_14px_rgba(0,0,0,0.75)] md:mt-10">
             <dl className="flex justify-around gap-6 sm:justify-start sm:gap-12">
               {stats.map((s) => (
                 <div key={s.l} className="text-center sm:text-left">
                   <dt className="sr-only">{s.l}</dt>
-                  <dd className="font-serif text-3xl font-bold text-gold-grad">{s.n}</dd>
-                  <dd className="text-[11px] font-semibold uppercase tracking-wider text-white/60">{s.l}</dd>
+                  <dd className="font-serif text-4xl font-bold text-gold-grad [filter:drop-shadow(0_1px_2px_rgba(0,0,0,0.9))_drop-shadow(0_2px_10px_rgba(0,0,0,0.6))]">{s.n}</dd>
+                  <dd className="text-xs font-bold uppercase tracking-wider text-white">{s.l}</dd>
                 </div>
               ))}
             </dl>
