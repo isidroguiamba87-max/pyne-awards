@@ -1,10 +1,11 @@
 import { useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { IconArrowUp, IconCheck, IconClock, IconPin, IconShirt, IconStar, IconUsers } from '../components/Icons'
+import { IconArrowUp, IconCheck, IconClock, IconExternal, IconPin, IconShirt, IconStar, IconUsers } from '../components/Icons'
 import { LiveBadge } from '../components/NowCard'
 import { useI18n } from '../i18n'
 import { days, events, type Lang, type ProgramEvent } from '../lib/programa'
 import { currentDay, isDone, isLive, slots, useNow, type Slot } from '../lib/time'
+import { venueMapUrl } from '../lib/venues'
 
 // ---------- utilitários ----------
 
@@ -65,16 +66,33 @@ function Person({ name, role, small = false }: { name: string; role: string; sma
   )
 }
 
-function Chip({ Icon, dark = false, children }: { Icon: typeof IconPin; dark?: boolean; children: ReactNode }) {
+function Chip({ Icon, dark = false, href, label, children }: { Icon: typeof IconPin; dark?: boolean; href?: string; label?: string; children: ReactNode }) {
+  const cls = `inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] ring-1 ${
+    dark ? 'bg-white/10 text-white ring-white/15' : 'bg-paper text-ink ring-paper-line'
+  }`
+  const icon = <Icon className={`h-3.5 w-3.5 shrink-0 ${dark ? 'text-gold' : 'text-gold-deep'}`} />
+  if (!href) {
+    return (
+      <span className={cls}>
+        {icon}
+        {children}
+      </span>
+    )
+  }
+  // chip de local: abre o mapa
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] ring-1 ${
-        dark ? 'bg-white/10 text-white ring-white/15' : 'bg-paper text-ink ring-paper-line'
-      }`}
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={label}
+      title={label}
+      className={`${cls} group transition ${dark ? 'hover:bg-white/20 hover:ring-gold' : 'hover:bg-white hover:ring-gold'}`}
     >
-      <Icon className={`h-3.5 w-3.5 shrink-0 ${dark ? 'text-gold' : 'text-gold-deep'}`} />
-      {children}
-    </span>
+      {icon}
+      <span className="underline decoration-current/30 underline-offset-2 group-hover:decoration-current">{children}</span>
+      <IconExternal className={`h-3 w-3 shrink-0 opacity-60 group-hover:opacity-100 ${dark ? 'text-gold' : 'text-gold-deep'}`} />
+    </a>
   )
 }
 
@@ -210,7 +228,7 @@ function EventCard({ ev, t0 }: { ev: ProgramEvent; t0: number }) {
           <Chip Icon={IconClock} dark={gala}>
             <span className="font-semibold tabular-nums">{ev.time.replace('–', ' – ')}</span>
           </Chip>
-          <Chip Icon={IconPin} dark={gala}>
+          <Chip Icon={IconPin} dark={gala} href={venueMapUrl(ev.venue)} label={`${t('agenda.map')}: ${ev.venue}`}>
             {ev.venue}
           </Chip>
           {ev.dressCode && (

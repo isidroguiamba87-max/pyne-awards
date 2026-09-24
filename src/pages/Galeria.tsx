@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { IconArrowUp, IconImage } from '../components/Icons'
+import { IconArrowUp, IconExternal, IconImage } from '../components/Icons'
 import Lightbox from '../components/Lightbox'
 import PageHeader from '../components/PageHeader'
 import { useI18n } from '../i18n'
@@ -7,6 +7,24 @@ import { days } from '../lib/programa'
 import { publicUrl, supabase, type Photo } from '../lib/supabase'
 
 const PAGE = 40
+// Álbum completo do evento (fotógrafo oficial)
+const ALBUM_URL = 'https://olhosfotografia.pic-time.com/Xe1zz38WBDDzH'
+
+function AlbumLink({ className = '' }: { className?: string }) {
+  const { t } = useI18n()
+  return (
+    <a
+      href={ALBUM_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`bg-gold-grad inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-navy shadow-lg shadow-black/20 transition hover:brightness-105 ${className}`}
+    >
+      <IconImage className="h-5 w-5" />
+      {t('gallery.album')}
+      <IconExternal className="h-4 w-4" />
+    </a>
+  )
+}
 
 export function Offline() {
   const { t } = useI18n()
@@ -115,7 +133,9 @@ export default function Galeria() {
 
   return (
     <>
-    <PageHeader kicker="Pyne Awards Africa 2026" title={t('gallery.title')} sub={t('gallery.sub')} />
+    <PageHeader kicker="Pyne Awards Africa 2026" title={t('gallery.title')} sub={t('gallery.sub')}>
+      <AlbumLink />
+    </PageHeader>
     <div className="mx-auto max-w-6xl px-4">
 
       {!supabase ? (

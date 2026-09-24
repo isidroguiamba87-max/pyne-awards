@@ -3,6 +3,7 @@ import { useI18n } from '../i18n'
 import { days } from '../lib/programa'
 import { EVENT_START, maputoDate, programStatus, slots, useNow, type Slot } from '../lib/time'
 import { IconClock, IconPin } from './Icons'
+import { venueMapUrl } from '../lib/venues'
 
 export function LiveBadge({ className = '' }: { className?: string }) {
   const { t } = useI18n()
@@ -19,7 +20,7 @@ export function slotTime(s: Slot) {
 }
 
 function SlotLine({ s, showDay, big = false }: { s: Slot; showDay: boolean; big?: boolean }) {
-  const { L } = useI18n()
+  const { L, t } = useI18n()
   const day = days.find((d) => d.day === s.event.day)
   return (
     <div>
@@ -30,10 +31,16 @@ function SlotLine({ s, showDay, big = false }: { s: Slot; showDay: boolean; big?
           {showDay && day ? `${L(day.label)} · ` : ''}
           {slotTime(s)}
         </span>
-        <span className="inline-flex items-center gap-1.5">
+        <a
+          href={venueMapUrl(s.event.venue)}
+          target="_blank"
+          rel="noopener noreferrer"
+          title={`${t('agenda.map')}: ${s.event.venue}`}
+          className="inline-flex items-center gap-1.5 underline decoration-ink-soft/30 underline-offset-2 hover:text-ink hover:decoration-gold"
+        >
           <IconPin className="h-4 w-4 text-gold-deep" />
           {s.event.venue}
-        </span>
+        </a>
       </p>
       <p className="mt-1 text-sm font-medium text-gold-deep">{L(s.event.title)}</p>
       {s.item.lead && L(s.item.lead) && <p className="mt-1 text-sm text-ink-soft">{L(s.item.lead)}</p>}

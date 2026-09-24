@@ -48,6 +48,7 @@ const pt = {
   'agenda.goNow': 'Ir para o que está a decorrer',
   'agenda.sessions': '{n} momentos',
   'agenda.main': 'Evento principal',
+  'agenda.map': 'Ver no mapa',
   'kind.speech': 'Intervenção',
   'kind.panel': 'Painel',
   'kind.networking': 'Networking',
@@ -81,6 +82,7 @@ const pt = {
   'gallery.prev': 'Anterior',
   'gallery.next': 'Seguinte',
   'gallery.photo': 'Foto',
+  'gallery.album': 'Ver mais fotos',
 
   // perguntas
   'q.title': 'Perguntas',
@@ -214,6 +216,7 @@ const en: Record<Key, string> = {
   'agenda.goNow': 'Jump to what is on now',
   'agenda.sessions': '{n} moments',
   'agenda.main': 'Main event',
+  'agenda.map': 'View on map',
   'kind.speech': 'Remarks',
   'kind.panel': 'Panel',
   'kind.networking': 'Networking',
@@ -245,6 +248,7 @@ const en: Record<Key, string> = {
   'gallery.prev': 'Previous',
   'gallery.next': 'Next',
   'gallery.photo': 'Photo',
+  'gallery.album': 'See more photos',
 
   'q.title': 'Questions',
   'q.sub': 'Send your question to the speakers. The team moderates and approved questions appear here live.',
