@@ -8,7 +8,7 @@
 - **Evento:** The Pyne Awards Africa 2026 (6.ª edição) — Maputo, **24 a 26 de Setembro de 2026**.
 - **Prazo:** o site tem de estar **online antes das 08h00 de 24/09** (primeira sessão do Dia 1). Trabalhamos contra o relógio: primeiro funcional, depois bonito.
 - **O quê:** um site **pequeno**, de uma só finalidade, com três coisas:
-  1. **Agenda** do programa (3 dias, 5 blocos, 37 itens).
+  1. **Agenda** do programa (3 dias, 5 blocos, 36 itens).
   2. **Galeria** de fotos actualizada **em tempo real** durante o evento.
   3. **Perguntas em tempo real** (Q&A): o público envia dúvidas, a equipa modera, aparecem ao vivo.
   4. Um **QR Code** que leva ao site (para imprimir/projectar no local).

@@ -74,7 +74,7 @@
         "en": "Morning session"
       },
       "venue": "Polana Serena Hotel",
-      "time": "08:00–12:00",
+      "time": "08:00–12:10",
       "dressCode": {
         "pt": "Business Casual",
         "en": "Business Casual"
@@ -137,19 +137,6 @@
         },
         {
           "start": "09:00",
-          "end": "09:10",
-          "title": {
-            "pt": "Intervenção do Secretário de Estado do Turismo",
-            "en": "Remarks by the Secretary of State for Tourism"
-          },
-          "lead": {
-            "pt": "S. Ex.ª Fredson Bacar — Secretário de Estado do Turismo",
-            "en": "H.E. Fredson Bacar — Secretary of State for Tourism"
-          },
-          "kind": "speech"
-        },
-        {
-          "start": "09:10",
           "end": "10:00",
           "title": {
             "pt": "Intervenções de Contexto",
@@ -220,14 +207,27 @@
             "en": "Closing remarks"
           },
           "lead": {
-            "pt": "ANDITUR",
-            "en": "ANDITUR"
+            "pt": "Helder Jauana — PCA da ANDITUR",
+            "en": "Helder Jauana — Chairman of the Board, ANDITUR"
           },
           "kind": "speech"
         },
         {
           "start": "11:05",
           "end": "11:10",
+          "title": {
+            "pt": "Discurso de encerramento",
+            "en": "Closing address"
+          },
+          "lead": {
+            "pt": "S. Ex.ª Rasaque Manhique — Presidente do Conselho Municipal de Maputo",
+            "en": "H.E. Rasaque Manhique — Mayor of Maputo"
+          },
+          "kind": "speech"
+        },
+        {
+          "start": "11:10",
+          "end": "11:20",
           "title": {
             "pt": "Fotografia oficial e encerramento da sessão",
             "en": "Official photograph and close of session"
@@ -239,8 +239,8 @@
           "kind": "logistics"
         },
         {
-          "start": "11:10",
-          "end": "12:00",
+          "start": "11:20",
+          "end": "12:10",
           "title": {
             "pt": "Pequeno-almoço e Networking Executivo",
             "en": "Breakfast and Executive Networking"
@@ -544,27 +544,14 @@
         },
         {
           "start": "19:25",
-          "end": "19:30",
-          "title": {
-            "pt": "Intervenção de Álvaro Massingue, Presidente da CTA — Confederação das Associações Económicas de Moçambique",
-            "en": "Remarks by Álvaro Massingue, President of CTA – Confederation of Business Associations of Mozambique"
-          },
-          "lead": {
-            "pt": "CTA",
-            "en": "CTA"
-          },
-          "kind": "speech"
-        },
-        {
-          "start": "19:30",
           "end": "19:40",
           "title": {
-            "pt": "Intervenção de S. Ex.ª Edmund Bartlett, Ministro do Turismo da Jamaica · Apresentação do destino Moçambique",
-            "en": "Remarks by H.E. Edmund Bartlett, Minister of Tourism of Jamaica · Destination Showcase – Mozambique"
+            "pt": "Intervenção de S. Ex.ª Edmund Bartlett, Ministro do Turismo da Jamaica",
+            "en": "Remarks by H.E. Edmund Bartlett, Minister of Tourism of Jamaica"
           },
           "lead": {
-            "pt": "Protocolo · ANDITUR",
-            "en": "Protocol team · ANDITUR"
+            "pt": "Protocolo",
+            "en": "Protocol team"
           },
           "kind": "speech"
         },
@@ -694,11 +681,11 @@
     }
   ],
   "_notes": [
-    "Fonte: Programa_Pyne_Awards_Africa_2026_PT.docx + Pyne_Awards_Africa_2026_Programme_EN.docx (conteúdo equivalente).",
-    "Corrigido: 'Entrada do Presidiu' -> 'Entrada do Presidium' (PT).",
-    "Corrigido: 'Payne Awards Africa' -> 'Pyne Awards Africa' (PT e EN, Welcome Mixer).",
-    "Por confirmar: na Gala há um intervalo entre 22:00 e 22:10 (Jantar termina 22:00, Encerramento começa 22:10).",
-    "Por confirmar: Dia 2 (Encontros de Negócios) e Dia 3 não indicam traje.",
-    "Os documentos indicam 'VISTO/APPROVED' sem nome — não mostrar no site."
-  ]
+    "Fonte actual: Programa_Pyne_Awards_Africa_2026_PT_-_Geral.docx (24/09). Traduções EN dos itens novos feitas a partir do PT.",
+    "Corrigido: 'Entrada do Presidiu' -> 'Entrada do Presidium'; 'Payne' -> 'Pyne'.",
+    "Pequeno-almoço agora termina às 12:10; o cabeçalho do documento ainda diz 08h00–12h00. No site usa-se 08:00–12:10.",
+    "Por confirmar: intervalo 22:00–22:10 na Gala.",
+    "Por confirmar: Dia 2 (Encontros de Negócios) e Dia 3 sem traje indicado."
+  ],
+  "_version": "2026-09-24 09:40 — Programa PT Geral (revisto)"
 }
