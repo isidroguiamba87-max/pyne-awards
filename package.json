@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.1",
+    "@vercel/analytics": "^2.0.1",
     "browser-image-compression": "^2.0.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.3.0",
