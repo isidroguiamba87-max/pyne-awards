@@ -7,8 +7,8 @@ import { days } from '../lib/programa'
 import { publicUrl, supabase, type Photo } from '../lib/supabase'
 
 const PAGE = 40
-// Álbum completo do evento (fotógrafo oficial)
-const ALBUM_URL = 'https://olhosfotografia.pic-time.com/Xe1zz38WBDDzH'
+// Álbum oficial do evento (projecto pyne-album)
+const ALBUM_URL = 'https://fotos.mediacraft.co.mz'
 
 function AlbumLink({ className = '' }: { className?: string }) {
   const { t } = useI18n()
