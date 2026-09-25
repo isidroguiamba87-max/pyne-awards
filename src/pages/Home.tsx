@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import NowCard from '../components/NowCard'
-import { IconCalendar, IconChat, IconChevronR, IconImage, IconPin } from '../components/Icons'
+import { IconCalendar, IconChat, IconChevronR, IconImage, IconPin, IconVideo } from '../components/Icons'
 import { useI18n } from '../i18n'
 import { days, events } from '../lib/programa'
 
@@ -11,6 +11,7 @@ export default function Home() {
   const shortcuts = [
     { to: '/agenda', title: t('nav.agenda'), sub: t('home.agenda.sub'), Icon: IconCalendar },
     { to: '/galeria', title: t('nav.gallery'), sub: t('home.gallery.sub'), Icon: IconImage },
+    { to: '/galeria?ver=videos', title: t('video.title'), sub: t('home.videos.sub'), Icon: IconVideo },
     { to: '/perguntas', title: t('nav.questions'), sub: t('home.questions.sub'), Icon: IconChat },
   ]
   const stats = [
@@ -95,7 +96,7 @@ export default function Home() {
       <div className="relative mx-auto -mt-12 max-w-5xl px-4">
         <NowCard />
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {shortcuts.map(({ to, title, sub, Icon }) => (
             <Link
               key={to}

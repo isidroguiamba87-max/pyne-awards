@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Link, Route, Routes, useLocation } from 'react-router-dom'
+import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import { useI18n } from './i18n'
 import Agenda from './pages/Agenda'
@@ -62,6 +62,7 @@ export default function App() {
         <Route index element={<Home />} />
         <Route path="agenda" element={<Agenda />} />
         <Route path="galeria" element={<Galeria />} />
+        <Route path="videos" element={<Navigate to="/galeria?ver=videos" replace />} />
         <Route path="perguntas" element={<Perguntas />} />
         <Route path="qr" element={<QR />} />
         <Route path="admin" element={<Admin />} />

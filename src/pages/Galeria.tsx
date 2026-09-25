@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { IconArrowUp, IconClock, IconExternal, IconImage } from '../components/Icons'
+import { useSearchParams } from 'react-router-dom'
+import { IconArrowUp, IconClock, IconExternal, IconImage, IconVideo } from '../components/Icons'
 import Lightbox from '../components/Lightbox'
 import PageHeader from '../components/PageHeader'
 import VideoCard from '../components/VideoCard'
@@ -51,6 +52,10 @@ export default function Galeria() {
   const dayRef = useRef(day)
   dayRef.current = day
   const { videos } = useVideos()
+  // ecrã activo: fotos (padrão) ou vídeos — no URL para o atalho do Início e para partilhar
+  const [params, setParams] = useSearchParams()
+  const view: 'fotos' | 'videos' = params.get('ver') === 'videos' ? 'videos' : 'fotos'
+  const setView = (v: 'fotos' | 'videos') => setParams(v === 'videos' ? { ver: 'videos' } : {}, { replace: true })
 
   const load = useCallback(async (from: number, d: number | null) => {
     if (!supabase) return
@@ -157,7 +162,31 @@ export default function Galeria() {
           </div>
         ) : (
           <>
-            <div className="sticky top-16 z-30 -mx-4 flex gap-2 overflow-x-auto border-b border-paper-line/70 bg-paper/90 px-4 py-3 backdrop-blur-md" role="group">
+            <div className="sticky top-16 z-30 -mx-4 border-b border-paper-line/70 bg-paper/90 px-4 py-3 backdrop-blur-md">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Fotos | Vídeos */}
+                <div className="flex w-full rounded-2xl bg-white p-1 shadow-sm ring-1 ring-paper-line sm:w-auto" role="tablist" aria-label={t('gallery.title')}>
+                  {([
+                    ['fotos', t('gallery.photos'), IconImage, null],
+                    ['videos', t('video.title'), IconVideo, videos.length],
+                  ] as const).map(([k, label, Icon, n]) => (
+                    <button
+                      key={k}
+                      role="tab"
+                      aria-selected={view === k}
+                      onClick={() => setView(k)}
+                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition sm:flex-none ${
+                        view === k ? 'bg-navy text-gold shadow-md' : 'text-ink-soft hover:text-ink'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {label}
+                      {n ? <span className={`rounded-full px-1.5 text-xs tabular-nums ${view === k ? 'bg-gold text-navy' : 'bg-paper text-ink-soft'}`}>{n}</span> : null}
+                    </button>
+                  ))}
+                </div>
+                {/* dias */}
+                <div className="-mx-1 flex gap-2 overflow-x-auto px-1" role="group">
               {filters.map((f) => (
                 <button
                   key={String(f.v)}
@@ -170,9 +199,11 @@ export default function Galeria() {
                   {f.label}
                 </button>
               ))}
+                </div>
+              </div>
             </div>
 
-            {newCount > 0 && (
+            {view === 'fotos' && newCount > 0 && (
               <button
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -185,22 +216,29 @@ export default function Galeria() {
               </button>
             )}
 
-            {/* vídeos */}
-            {shownVideos.length > 0 && (
-              <section className="mt-6" aria-labelledby="videos-h">
-                <h2 id="videos-h" className="mb-3 font-serif text-2xl font-bold text-ink">
-                  {t('video.title')}
-                </h2>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {shownVideos.map((v) => (
-                    <VideoCard key={v.source + v.id} v={v} />
-                  ))}
-                </div>
-                {photos.length > 0 && <h2 className="mt-10 font-serif text-2xl font-bold text-ink">{t('gallery.photos')}</h2>}
+            {/* ecrã de vídeos */}
+            {view === 'videos' && (
+              <section className="mt-6" aria-label={t('video.title')}>
+                {shownVideos.length > 0 ? (
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {shownVideos.map((v) => (
+                      <VideoCard key={v.source + v.id} v={v} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mx-auto mt-2 max-w-md rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-paper-line">
+                    <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-navy text-gold">
+                      <IconVideo className="h-7 w-7" />
+                    </span>
+                    <p className="mt-4 text-ink-soft">{t('video.empty')}</p>
+                  </div>
+                )}
               </section>
             )}
 
-            {/* fotos por momento da agenda */}
+            {/* ecrã de fotos, por momento da agenda */}
+            {view === 'fotos' && (
+            <>
             <div className="mt-4 space-y-8">
               {groups.map((g) => {
                 const dayInfo = days.find((d) => d.day === g.day)
@@ -250,7 +288,7 @@ export default function Galeria() {
               })}
             </div>
 
-            {!loading && !error && photos.length === 0 && shownVideos.length === 0 && (
+            {!loading && !error && photos.length === 0 && (
               <div className="mx-auto mt-8 max-w-md rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-paper-line">
                 <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-navy text-gold">
                   <IconImage className="h-7 w-7" />
@@ -274,6 +312,8 @@ export default function Galeria() {
                   {t('gallery.more')}
                 </button>
               </div>
+            )}
+            </>
             )}
           </>
         )}
