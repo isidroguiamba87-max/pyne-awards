@@ -16,6 +16,7 @@ export const SITE_URL = ((import.meta.env.VITE_SITE_URL as string | undefined) |
 export interface Photo {
   id: string
   created_at: string
+  taken_at?: string | null
   day: number | null
   event_id: string | null
   path: string

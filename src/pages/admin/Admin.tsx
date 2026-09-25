@@ -6,6 +6,7 @@ import PageHeader from '../../components/PageHeader'
 import { Offline } from '../Galeria'
 import AdminFotos from './AdminFotos'
 import AdminPerguntas from './AdminPerguntas'
+import AdminVideos from './AdminVideos'
 
 function Login() {
   const { t } = useI18n()
@@ -47,7 +48,7 @@ export default function Admin() {
   const { t } = useI18n()
   const [session, setSession] = useState<Session | null>(null)
   const [ready, setReady] = useState(false)
-  const [tab, setTab] = useState<'photos' | 'questions'>('photos')
+  const [tab, setTab] = useState<'photos' | 'questions' | 'videos'>('photos')
 
   useEffect(() => {
     if (!supabase) return
@@ -82,7 +83,7 @@ export default function Admin() {
       ) : (
         <>
           <div className="mt-6 flex gap-2 border-b border-paper-line" role="tablist">
-            {(['photos', 'questions'] as const).map((k) => (
+            {(['photos', 'questions', 'videos'] as const).map((k) => (
               <button
                 key={k}
                 role="tab"
@@ -90,7 +91,7 @@ export default function Admin() {
                 onClick={() => setTab(k)}
                 className={`-mb-px border-b-2 px-4 py-3 font-semibold ${tab === k ? 'border-gold text-navy' : 'border-transparent text-ink-soft hover:text-ink'}`}
               >
-                {t(k === 'photos' ? 'admin.tab.photos' : 'admin.tab.questions')}
+                {t(k === 'photos' ? 'admin.tab.photos' : k === 'questions' ? 'admin.tab.questions' : 'admin.tab.videos')}
               </button>
             ))}
           </div>
@@ -101,6 +102,7 @@ export default function Admin() {
           <div hidden={tab !== 'questions'}>
             <AdminPerguntas active={tab === 'questions'} />
           </div>
+          {tab === 'videos' && <AdminVideos />}
         </>
       )}
     </div>

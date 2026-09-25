@@ -39,9 +39,25 @@ function uuid() {
   return crypto.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
+/** Hora da câmara (EXIF). A câmara grava hora local sem fuso: assume-se Maputo (+02:00). */
+async function readTakenAt(file: File): Promise<string | null> {
+  try {
+    const { default: exifr } = await import('exifr')
+    const x = await exifr.parse(file, { pick: ['DateTimeOriginal', 'CreateDate', 'OffsetTimeOriginal'], reviveValues: false })
+    const raw = x?.DateTimeOriginal ?? x?.CreateDate
+    const m = raw && String(raw).match(/^(d{4}):(d{2}):(d{2}) (d{2}):(d{2}):(d{2})/)
+    if (!m) return null
+    const d = new Date(`${m[1]}-${m[2]}-${m[3]}T${m[4]}:${m[5]}:${m[6]}${x?.OffsetTimeOriginal ?? '+02:00'}`)
+    return Number.isNaN(d.getTime()) ? null : d.toISOString()
+  } catch {
+    return null
+  }
+}
+
 async function processJob(job: Job, update: (p: Partial<Job>) => void) {
   const sb = supabase!
   update({ status: 'compressing', progress: 2 })
+  const takenAt = await readTakenAt(job.file)
   const large = await imageCompression(job.file, {
     maxWidthOrHeight: 1600,
     maxSizeMB: 1.2,
@@ -81,7 +97,10 @@ async function processJob(job: Job, update: (p: Partial<Job>) => void) {
   if (up2.error) throw up2.error
   update({ progress: 95 })
 
-  const { error } = await sb.from('photos').insert({ day: job.day, event_id: job.eventId, path, thumb_path: thumbPath, width, height })
+  const row: Record<string, unknown> = { day: job.day, event_id: job.eventId, path, thumb_path: thumbPath, width, height }
+  // taken_at só existe depois de correr supabase/videos_e_momentos.sql; sem a coluna, grava sem ela
+  let { error } = await sb.from('photos').insert(takenAt ? { ...row, taken_at: takenAt } : row)
+  if (error && takenAt && /taken_at/.test(error.message)) ({ error } = await sb.from('photos').insert(row))
   if (error) throw error
   update({ status: 'done', progress: 100 })
 }
