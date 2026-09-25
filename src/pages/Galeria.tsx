@@ -136,7 +136,8 @@ export default function Galeria() {
     )
     io.observe(el)
     return () => io.disconnect()
-  }, [hasMore, loading, photos.length, day, load])
+    // view: o sentinela só existe no ecrã de fotos
+  }, [hasMore, loading, photos.length, day, load, view])
 
   // fotos agrupadas por momento da agenda (a mesma ordem serve o lightbox)
   const groups = useMemo(() => groupByMoment(photos, photoTime, (p) => ({ eventId: p.event_id, day: p.day, exact: !!p.taken_at })), [photos])
