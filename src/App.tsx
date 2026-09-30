@@ -11,7 +11,6 @@ const Ecra = lazy(() => import('./pages/Ecra'))
 const Galeria = lazy(() => import('./pages/Galeria'))
 const Perguntas = lazy(() => import('./pages/Perguntas'))
 const QR = lazy(() => import('./pages/QR'))
-const Biblioteca = lazy(() => import('./pages/Biblioteca'))
 
 function Loading() {
   return (
@@ -38,7 +37,6 @@ const TITLES: Record<string, string> = {
   '/agenda': 'nav.agenda',
   '/galeria': 'nav.gallery',
   '/perguntas': 'nav.questions',
-  '/biblioteca': 'nav.library',
   '/qr': 'qr.title',
   '/admin': 'admin.title',
 }
@@ -66,7 +64,7 @@ export default function App() {
         <Route path="galeria" element={<Galeria />} />
         <Route path="videos" element={<Navigate to="/galeria?ver=videos" replace />} />
         <Route path="perguntas" element={<Perguntas />} />
-        <Route path="biblioteca" element={<Biblioteca />} />
+        <Route path="biblioteca" element={<Navigate to="/galeria?ver=relatorio" replace />} />
         <Route path="qr" element={<QR />} />
         <Route path="admin" element={<Admin />} />
         <Route path="*" element={<NotFound />} />

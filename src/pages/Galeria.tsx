@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { IconArrowUp, IconClock, IconExternal, IconImage, IconVideo } from '../components/Icons'
+import { IconArrowUp, IconBook, IconClock, IconExternal, IconImage, IconVideo } from '../components/Icons'
 import Lightbox from '../components/Lightbox'
 import PageHeader from '../components/PageHeader'
 import VideoCard from '../components/VideoCard'
@@ -9,6 +9,9 @@ import { groupByMoment } from '../lib/moments'
 import { days, eventById } from '../lib/programa'
 import { publicUrl, supabase, type Photo } from '../lib/supabase'
 import { useVideos } from '../lib/videos'
+
+// o relatório (pdf) só carrega quando se abre esse ecrã
+const DocShelf = lazy(() => import('../components/DocShelf'))
 
 const PAGE = 40
 // Álbum oficial do evento (projecto pyne-album)
@@ -54,8 +57,9 @@ export default function Galeria() {
   const { videos } = useVideos()
   // ecrã activo: fotos (padrão) ou vídeos — no URL para o atalho do Início e para partilhar
   const [params, setParams] = useSearchParams()
-  const view: 'fotos' | 'videos' = params.get('ver') === 'videos' ? 'videos' : 'fotos'
-  const setView = (v: 'fotos' | 'videos') => setParams(v === 'videos' ? { ver: 'videos' } : {}, { replace: true })
+  const verParam = params.get('ver')
+  const view: 'fotos' | 'videos' | 'relatorio' = verParam === 'videos' || verParam === 'relatorio' ? verParam : 'fotos'
+  const setView = (v: 'fotos' | 'videos' | 'relatorio') => setParams(v === 'fotos' ? {} : { ver: v }, { replace: true })
 
   const load = useCallback(async (from: number, d: number | null) => {
     if (!supabase) return
@@ -170,13 +174,14 @@ export default function Galeria() {
                   {([
                     ['fotos', t('gallery.photos'), IconImage, null],
                     ['videos', t('video.title'), IconVideo, videos.length],
+                    ['relatorio', t('report.tab'), IconBook, null],
                   ] as const).map(([k, label, Icon, n]) => (
                     <button
                       key={k}
                       role="tab"
                       aria-selected={view === k}
                       onClick={() => setView(k)}
-                      className={`flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition sm:flex-none ${
+                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition sm:flex-none sm:gap-2 sm:px-5 ${
                         view === k ? 'bg-navy text-gold shadow-md' : 'text-ink-soft hover:text-ink'
                       }`}
                     >
@@ -187,7 +192,7 @@ export default function Galeria() {
                   ))}
                 </div>
                 {/* dias */}
-                <div className="-mx-1 flex gap-2 overflow-x-auto px-1" role="group">
+                <div className={`-mx-1 flex gap-2 overflow-x-auto px-1 ${view === 'relatorio' ? 'hidden' : ''}`} role="group">
               {filters.map((f) => (
                 <button
                   key={String(f.v)}
@@ -235,6 +240,13 @@ export default function Galeria() {
                   </div>
                 )}
               </section>
+            )}
+
+            {/* ecrã do relatório (resumo do evento em PDF) */}
+            {view === 'relatorio' && (
+              <Suspense fallback={<p className="py-8 text-center text-ink-soft">{t('gallery.loading')}</p>}>
+                <DocShelf />
+              </Suspense>
             )}
 
             {/* ecrã de fotos, por momento da agenda */}

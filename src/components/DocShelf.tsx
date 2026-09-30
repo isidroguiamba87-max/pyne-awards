@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
-import { IconBook, IconDownload, IconExternal } from '../components/Icons'
-import PageHeader from '../components/PageHeader'
+import { IconBook, IconDownload, IconExternal } from './Icons'
 import { useI18n } from '../i18n'
 import { docUrl, downloadUrl, formatBytes, type Doc } from '../lib/documents'
 import { supabase } from '../lib/supabase'
-import { Offline } from './Galeria'
 
 function BookCard({ d }: { d: Doc }) {
   const { t } = useI18n()
@@ -66,7 +64,8 @@ function BookCard({ d }: { d: Doc }) {
   )
 }
 
-export default function Biblioteca() {
+/** Estante do relatório (documentos PDF). Usada no ecrã "Relatório" da galeria. */
+export default function DocShelf() {
   const { t } = useI18n()
   const [docs, setDocs] = useState<Doc[]>([])
   const [loading, setLoading] = useState(true)
@@ -94,11 +93,9 @@ export default function Biblioteca() {
 
   return (
     <>
-      <PageHeader kicker="Pyne Awards Africa 2026" title={t('lib.title')} sub={t('lib.sub')} />
-      <div className="mx-auto max-w-6xl px-4 pt-6">
-        {!supabase ? (
-          <Offline />
-        ) : (
+      <div className="pt-6">
+        <p className="mb-5 text-ink-soft">{t('lib.sub')}</p>
+        {!supabase ? null : (
           <>
             {docs.length > 6 && (
               <input
