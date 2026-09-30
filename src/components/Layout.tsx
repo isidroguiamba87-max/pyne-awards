@@ -1,11 +1,12 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useI18n } from '../i18n'
-import { IconCalendar, IconChat, IconHome, IconImage } from './Icons'
+import { IconBook, IconCalendar, IconChat, IconHome, IconImage } from './Icons'
 
 const links = [
   { to: '/', key: 'nav.home', Icon: IconHome, end: true },
   { to: '/agenda', key: 'nav.agenda', Icon: IconCalendar, end: false },
   { to: '/galeria', key: 'nav.gallery', Icon: IconImage, end: false },
+  { to: '/biblioteca', key: 'nav.library', Icon: IconBook, end: false },
   { to: '/perguntas', key: 'nav.questions', Icon: IconChat, end: false },
 ] as const
 
@@ -101,7 +102,7 @@ export default function Layout() {
         className="fixed inset-x-0 bottom-0 z-40 border-t border-navy-line bg-navy-deep/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
         aria-label="Principal"
       >
-        <div className="grid grid-cols-4">
+        <div className="grid grid-cols-5">
           {links.map(({ to, key, Icon, end }) => (
             <NavLink
               key={to}

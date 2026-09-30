@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import NowCard from '../components/NowCard'
-import { IconCalendar, IconChat, IconChevronR, IconImage, IconPin, IconVideo } from '../components/Icons'
+import { IconBook, IconCalendar, IconChat, IconChevronR, IconImage, IconPin, IconVideo } from '../components/Icons'
 import { useI18n } from '../i18n'
 import { days, events } from '../lib/programa'
 
@@ -12,6 +12,7 @@ export default function Home() {
     { to: '/agenda', title: t('nav.agenda'), sub: t('home.agenda.sub'), Icon: IconCalendar },
     { to: '/galeria', title: t('nav.gallery'), sub: t('home.gallery.sub'), Icon: IconImage },
     { to: '/galeria?ver=videos', title: t('video.title'), sub: t('home.videos.sub'), Icon: IconVideo },
+    { to: '/biblioteca', title: t('nav.library'), sub: t('home.library.sub'), Icon: IconBook },
     { to: '/perguntas', title: t('nav.questions'), sub: t('home.questions.sub'), Icon: IconChat },
   ]
   const stats = [
@@ -96,12 +97,12 @@ export default function Home() {
       <div className="relative mx-auto -mt-12 max-w-5xl px-4">
         <NowCard />
 
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {shortcuts.map(({ to, title, sub, Icon }) => (
             <Link
               key={to}
               to={to}
-              className="group relative flex items-center gap-4 overflow-hidden rounded-2xl bg-white p-5 text-ink shadow-sm ring-1 ring-paper-line transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-navy/10 hover:ring-gold"
+              className="group relative flex items-center gap-4 overflow-hidden rounded-2xl bg-white p-5 lg:flex-col lg:items-start lg:gap-3 text-ink shadow-sm ring-1 ring-paper-line transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-navy/10 hover:ring-gold"
             >
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy text-gold shadow-md shadow-navy/20 transition group-hover:bg-gold group-hover:text-navy">
                 <Icon className="h-6 w-6" />
@@ -110,7 +111,7 @@ export default function Home() {
                 <span className="block font-serif text-xl font-semibold">{title}</span>
                 <span className="block text-sm text-ink-soft">{sub}</span>
               </span>
-              <IconChevronR className="h-5 w-5 shrink-0 text-ink/25 transition group-hover:translate-x-1 group-hover:text-gold-deep" />
+              <IconChevronR className="h-5 w-5 shrink-0 text-ink/25 lg:hidden transition group-hover:translate-x-1 group-hover:text-gold-deep" />
             </Link>
           ))}
         </div>

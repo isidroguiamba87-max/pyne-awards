@@ -68,6 +68,9 @@ export const IconExternal = (p: P) => (
 export const IconVideo = (p: P) => (
   <svg {...base} {...p}><rect x="2.5" y="5" width="19" height="14" rx="3" /><path d="m10 9.5 5 2.5-5 2.5z" fill="currentColor" /></svg>
 )
+export const IconBook = (p: P) => (
+  <svg {...base} {...p}><path d="M5 19V5a2 2 0 0 1 2-2h12v15H7a2 2 0 0 0-2 2 2 2 0 0 0 2 2h12" /><path d="M9 7h6M9 10.5h4" /></svg>
+)
 export const IconCheck = (p: P) => (
   <svg {...base} {...p}><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
 )
