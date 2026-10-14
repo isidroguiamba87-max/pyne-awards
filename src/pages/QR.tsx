@@ -49,7 +49,7 @@ export default function QR() {
     <div className="mx-auto max-w-xl px-4 pt-8 text-center">
 
       <div className="mx-auto inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-paper-line" role="group">
-        {(['site', 'questions'] as const).map((k) => (
+        {(['site', 'questions'] as const).filter((k) => k === 'site' || ev.questions).map((k) => (
           <button
             key={k}
             onClick={() => setTarget(k)}

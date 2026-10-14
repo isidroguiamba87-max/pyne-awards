@@ -1,8 +1,8 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
 import { DEFAULT_EVENT_SLUG, eventBySlug } from './events'
-import { EventNotFound, EventRoute } from './events/EventContext'
+import { EventNotFound, EventRoute, useEvent } from './events/EventContext'
 import { useI18n } from './i18n'
 import Agenda from './pages/Agenda'
 import EventChooser from './pages/EventChooser'
@@ -33,6 +33,12 @@ function LegacyRedirect({ to, params = {} }: { to: string; params?: Record<strin
   for (const [k, v] of Object.entries(params)) if (!q.has(k)) q.set(k, v)
   const qs = q.toString()
   return <Navigate to={`/${DEFAULT_EVENT_SLUG}${to}${qs ? `?${qs}` : ''}${hash}`} replace />
+}
+
+/** Perguntas e /ecra só existem em eventos com Q&A; senão vai para o início do evento */
+function WithQuestions({ children }: { children: ReactNode }) {
+  const ev = useEvent()
+  return ev.questions ? <>{children}</> : <Navigate to={`/${ev.slug}`} replace />
 }
 
 const TITLES: Record<string, string> = {
@@ -81,12 +87,12 @@ export default function App() {
 
         {/* cada evento com o seu "mundo" */}
         <Route path=":eventSlug" element={<EventRoute />}>
-          <Route path="ecra" element={<Ecra />} />
+          <Route path="ecra" element={<WithQuestions><Ecra /></WithQuestions>} />
           <Route element={<Layout />}>
             <Route index element={<EventHome />} />
             <Route path="agenda" element={<Agenda />} />
             <Route path="galeria" element={<Galeria />} />
-            <Route path="perguntas" element={<Perguntas />} />
+            <Route path="perguntas" element={<WithQuestions><Perguntas /></WithQuestions>} />
             <Route path="qr" element={<QR />} />
             <Route path="*" element={<EventNotFound />} />
           </Route>

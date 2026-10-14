@@ -4,7 +4,7 @@ import type { Session } from '@supabase/supabase-js'
 import EventCard from '../../components/EventCard'
 import { IconChevronL } from '../../components/Icons'
 import { Credit, LangSwitch } from '../../components/Layout'
-import { EVENTS, eventBySlug, eventPhase, formatDateRange } from '../../events'
+import { eventBySlug, eventPhase, eventsTodayFirst, formatDateRange } from '../../events'
 import { EventNotFound, EventProvider, useEvent, useEventTheme } from '../../events/EventContext'
 import { useI18n } from '../../i18n'
 import { supabase } from '../../lib/supabase'
@@ -85,7 +85,7 @@ function AdminChooser() {
       <h2 className="font-serif text-3xl font-bold text-ink">{t('events.title')}</h2>
       <p className="mt-1 text-ink-soft">{t('admin.choose.sub')}</p>
       <div className="mt-6 grid gap-6 md:grid-cols-2">
-        {EVENTS.map((e) => (
+        {eventsTodayFirst().map((e) => (
           <EventCard key={e.slug} event={e} to={`/admin/${e.slug}`} recommended={eventPhase(e) === 'today'} />
         ))}
       </div>
@@ -121,13 +121,15 @@ function AdminEventBar() {
 /** Admin de um evento: separadores Fotos · Perguntas · Vídeos · Relatório */
 function EventAdmin() {
   const { t } = useI18n()
+  const ev = useEvent()
   const [tab, setTab] = useState<Tab>('photos')
+  const tabs = (['photos', 'questions', 'videos', 'library'] as const).filter((k) => k !== 'questions' || ev.questions)
   return (
     <>
       <AdminEventBar />
       <div className="mx-auto max-w-5xl px-4">
         <div className="mt-6 flex gap-2 overflow-x-auto border-b border-paper-line" role="tablist">
-          {(['photos', 'questions', 'videos', 'library'] as const).map((k) => (
+          {tabs.map((k) => (
             <button
               key={k}
               role="tab"
@@ -143,9 +145,11 @@ function EventAdmin() {
         <div hidden={tab !== 'photos'}>
           <AdminFotos />
         </div>
-        <div hidden={tab !== 'questions'}>
-          <AdminPerguntas active={tab === 'questions'} />
-        </div>
+        {ev.questions && (
+          <div hidden={tab !== 'questions'}>
+            <AdminPerguntas active={tab === 'questions'} />
+          </div>
+        )}
         {tab === 'videos' && <AdminVideos />}
         {tab === 'library' && <AdminBiblioteca />}
       </div>

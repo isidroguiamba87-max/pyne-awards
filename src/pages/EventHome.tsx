@@ -15,10 +15,10 @@ function Shortcuts() {
     { to: path('/agenda'), title: t('nav.agenda'), sub: nDays > 1 ? t('home.agenda.sub.many', { n: nDays }) : t('home.agenda.sub.one'), Icon: IconCalendar },
     { to: path('/galeria'), title: t('nav.gallery'), sub: t('home.gallery.sub'), Icon: IconImage },
     ...(ev.albumVideos ? [{ to: path('/galeria?ver=videos'), title: t('video.title'), sub: t('home.videos.sub'), Icon: IconVideo }] : []),
-    { to: path('/perguntas'), title: t('nav.questions'), sub: t('home.questions.sub'), Icon: IconChat },
+    ...(ev.questions ? [{ to: path('/perguntas'), title: t('nav.questions'), sub: t('home.questions.sub'), Icon: IconChat }] : []),
   ]
   return (
-    <div className={`mt-6 grid gap-3 sm:grid-cols-2 ${shortcuts.length === 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3'}`}>
+    <div className={`mt-6 grid gap-3 ${shortcuts.length === 2 ? 'sm:grid-cols-2' : 'sm:grid-cols-2'} ${shortcuts.length === 4 ? 'lg:grid-cols-4' : shortcuts.length === 3 ? 'lg:grid-cols-3' : 'lg:grid-cols-2'}`}>
       {shortcuts.map(({ to, title, sub, Icon }) => (
         <Link
           key={to}

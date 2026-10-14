@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import EventCard from '../components/EventCard'
 import { Credit, LangSwitch } from '../components/Layout'
-import { EVENTS } from '../events'
+import { eventsTodayFirst } from '../events'
 import { useEventTheme } from '../events/EventContext'
 import { useI18n } from '../i18n'
 
@@ -27,7 +27,7 @@ export default function EventChooser() {
         <h1 className="font-serif text-4xl font-bold text-ink md:text-5xl">{t('events.title')}</h1>
         <p className="mt-2 text-ink-soft">{t('events.sub')}</p>
         <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {EVENTS.map((e) => (
+          {eventsTodayFirst().map((e) => (
             <EventCard key={e.slug} event={e} to={`/${e.slug}`} />
           ))}
         </div>

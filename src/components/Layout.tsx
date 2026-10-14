@@ -90,6 +90,7 @@ export default function Layout() {
   const ev = useEvent()
   const path = useEventPath()
   const light = ev.look === 'light'
+  const nav = links.filter((l) => l.to !== '/perguntas' || ev.questions)
 
   return (
     <div className="flex min-h-dvh flex-col">
@@ -113,7 +114,7 @@ export default function Layout() {
             </Link>
           </div>
           <nav className="hidden items-center gap-1 md:flex" aria-label="Principal">
-            {links.map(({ to, key, end }) => (
+            {nav.map(({ to, key, end }) => (
               <NavLink
                 key={to}
                 to={path(to)}
@@ -145,8 +146,8 @@ export default function Layout() {
         }`}
         aria-label="Principal"
       >
-        <div className="grid grid-cols-4">
-          {links.map(({ to, key, Icon, end }) => (
+        <div className={`grid ${nav.length === 4 ? 'grid-cols-4' : 'grid-cols-3'}`}>
+          {nav.map(({ to, key, Icon, end }) => (
             <NavLink
               key={to}
               to={path(to)}

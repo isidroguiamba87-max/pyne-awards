@@ -33,6 +33,8 @@ export interface EventMeta {
   albumUrl: string
   /** vídeos guardados no projecto do álbum (só o Pyne tem) */
   albumVideos: boolean
+  /** secção de Perguntas (Q&A) activa neste evento */
+  questions: boolean
   footer: { copyright: string; partnersBanner?: { src: string; alt: string } }
   /** links de mapa por nome de local (campo "venue" dos blocos) */
   venueMaps?: Record<string, string>
@@ -54,6 +56,7 @@ export const EVENTS: EventMeta[] = [
     heroImage: '/hero-elevate.webp',
     albumUrl: `${ALBUM_BASE}/pyne-awards-2026`,
     albumVideos: true,
+    questions: true,
     footer: {
       copyright: '© 2026 The Pyne Hospitality Company · Maputo',
       partnersBanner: {
@@ -82,6 +85,7 @@ export const EVENTS: EventMeta[] = [
     banner: { src: '/events/citizen-connect-2026/header.png', alt: 'República de Moçambique · Citizen Connect Africa · VFS Global · CiX', width: 2109, height: 484 },
     albumUrl: `${ALBUM_BASE}/citizen-connect-2026`,
     albumVideos: false,
+    questions: false,
     footer: { copyright: '© 2026 VFS Global · CiX' },
   },
 ].sort((a, b) => a.order - b.order) as EventMeta[]
@@ -90,6 +94,11 @@ export const DEFAULT_EVENT_SLUG = 'pyne-awards-2026'
 
 export function eventBySlug(slug: string | null | undefined) {
   return EVENTS.find((e) => e.slug === slug)
+}
+
+/** Eventos para mostrar: o que decorre hoje (Maputo) primeiro, depois pela ordem do registo */
+export function eventsTodayFirst(t = now()) {
+  return [...EVENTS].sort((a, b) => Number(eventPhase(b, t) === 'today') - Number(eventPhase(a, t) === 'today') || a.order - b.order)
 }
 
 /** Estado do evento pela data de Maputo */
