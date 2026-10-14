@@ -5,6 +5,8 @@
 --
 -- ORDEM:  0 → 1 → 2 → 2b → [deploy do código novo] → 3 → 4
 -- (antes do deploy o default 'pyne-awards-2026' mantém o site antigo a funcionar)
+-- ⚠️ NÃO correr o ficheiro inteiro de uma vez: seleccionar só o PASSO a correr.
+--    Os PASSOS 3 e 4 só DEPOIS do deploy.
 -- ============================================================
 
 
@@ -29,6 +31,8 @@ create table if not exists public.events (
   active      boolean not null default true
 );
 alter table public.events enable row level security;
+drop policy if exists "events_public_read" on public.events;
+drop policy if exists "events_admin_write" on public.events;
 create policy "events_public_read" on public.events for select using (true);
 create policy "events_admin_write" on public.events for all to authenticated using (true) with check (true);
 insert into public.events (slug, name, start_date, end_date, sort_order) values
