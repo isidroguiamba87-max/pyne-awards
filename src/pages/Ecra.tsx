@@ -1,18 +1,21 @@
 import { useSearchParams } from 'react-router-dom'
 import { QRSvg } from '../components/PyneQR'
 import { useI18n } from '../i18n'
-import { eventById } from '../lib/programa'
+import { useEvent } from '../events/EventContext'
 import { useQuestions } from '../lib/questions'
 import { SITE_URL, supabase } from '../lib/supabase'
 import { maputoTime, useNow } from '../lib/time'
 import { IconThumb } from '../components/Icons'
 
-/** Modo projector: /ecra  (opcional: ?sessao=gala&lang=en) */
+/** Modo projector: /<evento>/ecra  (opcional: ?sessao=<bloco>&lang=en) */
 export default function Ecra() {
   const { t, L } = useI18n()
+  const meta = useEvent()
+  const { eventById } = meta.program
   const [params] = useSearchParams()
   const session = params.get('sessao')
-  const { items } = useQuestions(['approved'], 'questions-screen')
+  const { items } = useQuestions(['approved'], 'questions-screen', meta.slug)
+  const questionsUrl = `${SITE_URL}/${meta.slug}/perguntas`
   const t0 = useNow(15_000)
 
   const list = session ? items.filter((q) => q.event_id === session) : items
@@ -24,11 +27,15 @@ export default function Ecra() {
     <div className="hero-bg flex min-h-dvh flex-col overflow-hidden p-[3vw] text-white">
       <header className="flex items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <img src="/pyne-emblem-gold.png" alt="" className="h-[6vh] w-auto" />
+          {meta.look === 'light' ? (
+            <span className="rounded-[1.2vh] bg-white px-[1.4vh] py-[0.8vh] shadow-lg">
+              <img src={meta.logo.src} alt={meta.logo.alt} className="h-[6vh] w-auto" />
+            </span>
+          ) : (
+            <img src={meta.logo.src} alt="" className="h-[6vh] w-auto" />
+          )}
           <div>
-            <p className="font-serif text-[2.4vh] font-bold">
-              The Pyne Awards <span className="text-gold">Africa</span> 2026
-            </p>
+            <p className="font-serif text-[2.4vh] font-bold">{L(meta.name)}</p>
             <p className="text-[1.8vh] text-white/70">{ev ? L(ev.title) : t('q.title')}</p>
           </div>
         </div>
@@ -67,10 +74,10 @@ export default function Ecra() {
       </main>
 
       <aside className="fixed right-[2vw] bottom-[2vw] flex items-center gap-3 rounded-[1.5vh] bg-white p-[1.2vh] pr-[2vh] text-navy shadow-2xl">
-        <QRSvg value={`${SITE_URL}/perguntas`} size={160} className="h-[14vh] w-[14vh]" />
+        <QRSvg value={questionsUrl} size={160} className="h-[14vh] w-[14vh]" />
         <div className="max-w-[18vh]">
           <p className="font-serif text-[2.2vh] leading-tight font-bold">{t('screen.send')}</p>
-          <p className="mt-1 text-[1.5vh] break-all text-navy/70">{SITE_URL.replace(/^https?:\/\//, '')}/perguntas</p>
+          <p className="mt-1 text-[1.5vh] break-all text-navy/70">{questionsUrl.replace(/^https?:\/\//, '')}</p>
         </div>
       </aside>
     </div>

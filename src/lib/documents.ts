@@ -11,6 +11,7 @@ export interface Doc {
   pages: number | null
   bytes: number | null
   hidden: boolean
+  event_slug: string
 }
 
 export function docUrl(path: string) {

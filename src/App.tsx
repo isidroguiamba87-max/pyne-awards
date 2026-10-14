@@ -1,11 +1,14 @@
 import { lazy, Suspense, useEffect } from 'react'
-import { Link, Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
 import Layout from './components/Layout'
+import { DEFAULT_EVENT_SLUG, eventBySlug } from './events'
+import { EventNotFound, EventRoute } from './events/EventContext'
 import { useI18n } from './i18n'
 import Agenda from './pages/Agenda'
-import Home from './pages/Home'
+import EventChooser from './pages/EventChooser'
+import EventHome from './pages/EventHome'
 
-// Início e Agenda carregam logo (é o que se abre pelo QR); o resto só quando é preciso
+// Escolha do evento, início e agenda carregam logo (é o que se abre pelo QR); o resto só quando é preciso
 const Admin = lazy(() => import('./pages/admin/Admin'))
 const Ecra = lazy(() => import('./pages/Ecra'))
 const Galeria = lazy(() => import('./pages/Galeria'))
@@ -20,56 +23,76 @@ function Loading() {
   )
 }
 
-function NotFound() {
-  const { t } = useI18n()
-  return (
-    <div className="mx-auto max-w-md px-4 py-24 text-center">
-      <p className="font-serif text-6xl font-bold text-gold">404</p>
-      <p className="mt-3 text-white/75">{t('notFound')}</p>
-      <Link to="/" className="mt-6 inline-block rounded-xl bg-gold px-5 py-3 font-semibold text-navy">
-        {t('backHome')}
-      </Link>
-    </div>
-  )
+/**
+ * Links antigos (QR Codes do Pyne já impressos): /agenda, /galeria, /perguntas, /ecra, /qr…
+ * → /pyne-awards-2026/…, mantendo ?now=, ?ver=, ?sessao=, etc.
+ */
+function LegacyRedirect({ to, params = {} }: { to: string; params?: Record<string, string> }) {
+  const { search, hash } = useLocation()
+  const q = new URLSearchParams(search)
+  for (const [k, v] of Object.entries(params)) if (!q.has(k)) q.set(k, v)
+  const qs = q.toString()
+  return <Navigate to={`/${DEFAULT_EVENT_SLUG}${to}${qs ? `?${qs}` : ''}${hash}`} replace />
 }
 
 const TITLES: Record<string, string> = {
-  '/agenda': 'nav.agenda',
-  '/galeria': 'nav.gallery',
-  '/perguntas': 'nav.questions',
-  '/qr': 'qr.title',
-  '/admin': 'admin.title',
+  agenda: 'nav.agenda',
+  galeria: 'nav.gallery',
+  perguntas: 'nav.questions',
+  qr: 'qr.title',
 }
 
 export default function App() {
   const { pathname } = useLocation()
-  const { t } = useI18n()
+  const { t, L } = useI18n()
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [pathname])
 
+  // título do separador: "<Página> · <evento>"
   useEffect(() => {
-    const k = TITLES[pathname] as Parameters<typeof t>[0] | undefined
-    document.title = k ? `${t(k)} · Pyne Awards Africa 2026` : 'Pyne Awards Africa 2026 · Maputo'
-  }, [pathname, t])
+    const [, first, second] = pathname.split('/')
+    const ev = eventBySlug(first === 'admin' ? second : first)
+    if (first === 'admin') document.title = `${t('admin.title')}${ev ? ` · ${ev.shortName}` : ''}`
+    else if (ev) {
+      const k = TITLES[second ?? ''] as Parameters<typeof t>[0] | undefined
+      document.title = k ? `${t(k)} · ${ev.shortName}` : `${L(ev.name)} · ${L(ev.city).split(',')[0]}`
+    }
+  }, [pathname, t, L])
 
   return (
     <Suspense fallback={<Loading />}>
-    <Routes>
-      <Route path="/ecra" element={<Ecra />} />
-      <Route element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="agenda" element={<Agenda />} />
-        <Route path="galeria" element={<Galeria />} />
-        <Route path="videos" element={<Navigate to="/galeria?ver=videos" replace />} />
-        <Route path="perguntas" element={<Perguntas />} />
-        <Route path="biblioteca" element={<Navigate to="/galeria?ver=relatorio" replace />} />
-        <Route path="qr" element={<QR />} />
+      <Routes>
+        <Route index element={<EventChooser />} />
+
+        {/* links antigos do Pyne */}
+        <Route path="agenda" element={<LegacyRedirect to="/agenda" />} />
+        <Route path="galeria" element={<LegacyRedirect to="/galeria" />} />
+        <Route path="perguntas" element={<LegacyRedirect to="/perguntas" />} />
+        <Route path="ecra" element={<LegacyRedirect to="/ecra" />} />
+        <Route path="qr" element={<LegacyRedirect to="/qr" />} />
+        <Route path="videos" element={<LegacyRedirect to="/galeria" params={{ ver: 'videos' }} />} />
+        <Route path="biblioteca" element={<LegacyRedirect to="/galeria" params={{ ver: 'relatorio' }} />} />
+
+        {/* admin: login → escolha do evento → admin do evento */}
         <Route path="admin" element={<Admin />} />
-        <Route path="*" element={<NotFound />} />
-      </Route>
-    </Routes>
+        <Route path="admin/:eventSlug" element={<Admin />} />
+
+        {/* cada evento com o seu "mundo" */}
+        <Route path=":eventSlug" element={<EventRoute />}>
+          <Route path="ecra" element={<Ecra />} />
+          <Route element={<Layout />}>
+            <Route index element={<EventHome />} />
+            <Route path="agenda" element={<Agenda />} />
+            <Route path="galeria" element={<Galeria />} />
+            <Route path="perguntas" element={<Perguntas />} />
+            <Route path="qr" element={<QR />} />
+            <Route path="*" element={<EventNotFound />} />
+          </Route>
+        </Route>
+        <Route path="*" element={<EventNotFound />} />
+      </Routes>
     </Suspense>
   )
 }

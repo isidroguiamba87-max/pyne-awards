@@ -6,10 +6,12 @@ interface Props {
   message: string
   onConfirm: () => void
   onCancel: () => void
+  /** 'danger' (vermelho, por defeito) para apagar; 'primary' para confirmar uma acção normal */
+  tone?: 'danger' | 'primary'
 }
 
 /** Substituto do confirm() nativo */
-export default function ConfirmDialog({ open, message, onConfirm, onCancel }: Props) {
+export default function ConfirmDialog({ open, message, onConfirm, onCancel, tone = 'danger' }: Props) {
   const { t } = useI18n()
   const cancelRef = useRef<HTMLButtonElement>(null)
 
@@ -35,7 +37,10 @@ export default function ConfirmDialog({ open, message, onConfirm, onCancel }: Pr
           <button ref={cancelRef} onClick={onCancel} className="rounded-lg px-4 py-2.5 font-medium text-ink-soft hover:bg-paper">
             {t('cancel')}
           </button>
-          <button onClick={onConfirm} className="rounded-lg bg-red px-4 py-2.5 font-semibold text-white hover:brightness-110">
+          <button
+            onClick={onConfirm}
+            className={`rounded-lg px-4 py-2.5 font-semibold hover:brightness-110 ${tone === 'danger' ? 'bg-red text-white' : 'bg-navy text-gold'}`}
+          >
             {t('confirm')}
           </button>
         </div>

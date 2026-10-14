@@ -134,3 +134,11 @@ Depois de cada etapa: `npm run build` sem erros, testar em largura de telemóvel
 - Todo o texto de interface em PT e EN (ficheiro `src/i18n.ts` simples com objecto de traduções).
 - Acessibilidade básica: contraste AA, `alt` nas imagens, foco visível.
 - Código simples e legível; sem dependências desnecessárias.
+
+## 10. Multi-evento (desde 14/10/2026)
+
+- O site tem vários eventos: `/` é a escolha do evento; cada evento vive em `/<slug>/...` (agenda, galeria, perguntas, ecra, qr). Os links antigos (`/agenda`, `/galeria`, `/perguntas`, `/ecra`, `/qr`, `/videos`, `/biblioteca`) redireccionam para `/pyne-awards-2026/...`.
+- Registo de eventos: `src/events/index.ts` (slug, nome, datas, programa, logótipo, tema, álbum, rodapé). Programas em `data/events/<slug>.json`. Tema (cores) em `src/index.css` com `[data-event='<slug>']`.
+- Um evento novo = entrada no registo + JSON do programa + linha na tabela `events` do Supabase (+ tema opcional).
+- Base de dados: `photos`, `questions`, `videos` e `documents` têm `event_slug`. Todas as queries e subscrições Realtime filtram por evento. Migração em `supabase/migracao-multi-evento.sql`.
+- Admin: `/admin` → escolha do evento → `/admin/<slug>`. Uploads novos vão para `galeria/<slug>/dia-<n>/...`.

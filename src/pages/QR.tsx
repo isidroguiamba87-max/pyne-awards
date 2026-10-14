@@ -3,6 +3,7 @@ import { QRCanvas, QRSvg } from '../components/PyneQR'
 import { IconDownload } from '../components/Icons'
 import PageHeader from '../components/PageHeader'
 import { useI18n } from '../i18n'
+import { useEvent } from '../events/EventContext'
 import { SITE_URL } from '../lib/supabase'
 
 function save(href: string, name: string) {
@@ -15,12 +16,14 @@ function save(href: string, name: string) {
 }
 
 export default function QR() {
-  const { t } = useI18n()
+  const { t, L } = useI18n()
   const [target, setTarget] = useState<'site' | 'questions'>('site')
-  const value = target === 'site' ? SITE_URL : `${SITE_URL}/perguntas`
+  const ev = useEvent()
+  // o QR aponta para o evento: /<slug> ou /<slug>/perguntas
+  const value = target === 'site' ? `${SITE_URL}/${ev.slug}` : `${SITE_URL}/${ev.slug}/perguntas`
   const svgRef = useRef<SVGSVGElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const base = target === 'site' ? 'pyne-awards-qr' : 'pyne-awards-qr-perguntas'
+  const base = target === 'site' ? `${ev.slug}-qr` : `${ev.slug}-qr-perguntas`
 
   function downloadPng() {
     const c = canvasRef.current
@@ -42,7 +45,7 @@ export default function QR() {
 
   return (
     <>
-    <PageHeader kicker="Pyne Awards Africa 2026" title={t('qr.title')} sub={t('qr.caption.site')} />
+    <PageHeader kicker={ev.shortName} title={t('qr.title')} sub={t('qr.caption.site')} />
     <div className="mx-auto max-w-xl px-4 pt-8 text-center">
 
       <div className="mx-auto inline-flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-paper-line" role="group">
@@ -60,7 +63,7 @@ export default function QR() {
 
       <div className="mx-auto mt-6 max-w-sm rounded-3xl bg-white p-5 text-navy shadow-[0_20px_60px_-20px_rgba(19,38,61,0.4)] ring-2 ring-gold">
         <QRSvg ref={svgRef} value={value} size={512} className="h-auto w-full" />
-        <p className="mt-2 font-serif text-xl font-bold">The Pyne Awards Africa 2026</p>
+        <p className="mt-2 font-serif text-xl font-bold">{L(ev.name)}</p>
         <p className="text-sm font-semibold tracking-wide text-red">
           {t(target === 'site' ? 'qr.caption.site' : 'qr.caption.questions')}
         </p>

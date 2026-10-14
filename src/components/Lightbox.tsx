@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { useI18n } from '../i18n'
-import { eventById } from '../lib/programa'
+import { useEvent } from '../events/EventContext'
 import { publicUrl, type Photo } from '../lib/supabase'
 import { IconChevronL, IconChevronR, IconDownload, IconX } from './Icons'
 
@@ -13,6 +13,7 @@ interface Props {
 
 export default function Lightbox({ photos, index, onIndex, onClose }: Props) {
   const { t, L } = useI18n()
+  const { eventById } = useEvent().program
   const photo = photos[index]
   const touchX = useRef<number | null>(null)
   const closeRef = useRef<HTMLButtonElement>(null)

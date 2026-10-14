@@ -1,9 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useI18n } from '../i18n'
-import { days } from '../lib/programa'
-import { EVENT_START, maputoDate, programStatus, slots, useNow, type Slot } from '../lib/time'
-import { IconClock, IconPin } from './Icons'
+import { useEvent, useEventPath } from '../events/EventContext'
+import type { Slot } from '../lib/programa'
+import { maputoDate, useNow } from '../lib/time'
 import { venueMapUrl } from '../lib/venues'
+import { IconClock, IconPin } from './Icons'
 
 export function LiveBadge({ className = '' }: { className?: string }) {
   const { t } = useI18n()
@@ -21,28 +22,41 @@ export function slotTime(s: Slot) {
 
 function SlotLine({ s, showDay, big = false }: { s: Slot; showDay: boolean; big?: boolean }) {
   const { L, t } = useI18n()
+  const ev = useEvent()
+  const { days } = ev.program
   const day = days.find((d) => d.day === s.event.day)
+  const venue = s.event.venue
   return (
     <div>
       <p className={`font-serif leading-snug font-semibold text-ink ${big ? 'text-2xl md:text-3xl' : 'text-lg md:text-xl'}`}>{L(s.item.title)}</p>
       <p className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-ink-soft">
         <span className="inline-flex items-center gap-1.5 font-semibold text-ink">
           <IconClock className="h-4 w-4 text-gold-deep" />
-          {showDay && day ? `${L(day.label)} · ` : ''}
+          {showDay && day && days.length > 1 ? `${L(day.label)} · ` : ''}
           {slotTime(s)}
         </span>
-        <a
-          href={venueMapUrl(s.event.venue)}
-          target="_blank"
-          rel="noopener noreferrer"
-          title={`${t('agenda.map')}: ${s.event.venue}`}
-          className="inline-flex items-center gap-1.5 underline decoration-ink-soft/30 underline-offset-2 hover:text-ink hover:decoration-gold"
-        >
-          <IconPin className="h-4 w-4 text-gold-deep" />
-          {s.event.venue}
-        </a>
+        {venue ? (
+          <a
+            href={venueMapUrl(venue, ev.venueMaps)}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`${t('agenda.map')}: ${venue}`}
+            className="inline-flex items-center gap-1.5 underline decoration-ink-soft/30 underline-offset-2 hover:text-ink hover:decoration-gold"
+          >
+            <IconPin className="h-4 w-4 text-gold-deep" />
+            {venue}
+          </a>
+        ) : (
+          <span className="inline-flex items-center gap-1.5">
+            <IconPin className="h-4 w-4 text-gold-deep" />
+            {t('venue.tbc')}
+          </span>
+        )}
       </p>
-      <p className="mt-1 text-sm font-medium text-gold-deep">{L(s.event.title)}</p>
+      <p className="mt-1 text-sm font-medium text-gold-deep">
+        {s.event.sessionNumber ? `${t('agenda.session', { n: s.event.sessionNumber })} · ` : ''}
+        {L(s.event.title)}
+      </p>
       {s.item.lead && L(s.item.lead) && <p className="mt-1 text-sm text-ink-soft">{L(s.item.lead)}</p>}
     </div>
   )
@@ -50,6 +64,7 @@ function SlotLine({ s, showDay, big = false }: { s: Slot; showDay: boolean; big?
 
 function Countdown({ t0 }: { t0: number }) {
   const { t } = useI18n()
+  const { EVENT_START } = useEvent().program
   const diff = Math.max(0, EVENT_START - t0)
   const parts = [
     { v: Math.floor(diff / 86_400_000), l: t('now.days') },
@@ -70,7 +85,10 @@ function Countdown({ t0 }: { t0: number }) {
 }
 
 export default function NowCard() {
-  const { t } = useI18n()
+  const { t, L } = useI18n()
+  const ev = useEvent()
+  const path = useEventPath()
+  const { EVENT_START, programStatus, slots } = ev.program
   // 1 s antes do evento (contagem), 30 s durante
   const t0 = useNow(Date.now() < EVENT_START ? 1000 : 30_000)
   const { phase, live, next } = programStatus(t0)
@@ -101,8 +119,8 @@ export default function NowCard() {
       <section className={`${shell} text-center`}>
         {topBar}
         <h2 className="font-serif text-3xl font-bold text-ink">{t('now.after.title')}</h2>
-        <p className="mx-auto mt-3 max-w-md text-ink-soft">{t('now.after.text')}</p>
-        <Link to="/galeria" className="mt-5 inline-block rounded-xl bg-navy px-6 py-3 font-semibold text-gold hover:bg-navy-soft">
+        <p className="mx-auto mt-3 max-w-md text-ink-soft">{t('now.after.text', { name: L(ev.name) })}</p>
+        <Link to={path('/galeria')} className="mt-5 inline-block rounded-xl bg-navy px-6 py-3 font-semibold text-gold hover:bg-navy-soft">
           {t('now.after.cta')}
         </Link>
       </section>
@@ -133,7 +151,7 @@ export default function NowCard() {
           </div>
         )}
       </div>
-      <Link to="/agenda" className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-navy underline decoration-gold decoration-2 underline-offset-4 hover:text-gold-deep">
+      <Link to={path('/agenda')} className="mt-5 inline-flex items-center gap-1 text-sm font-semibold text-navy underline decoration-gold decoration-2 underline-offset-4 hover:text-gold-deep">
         {t('now.fullAgenda')} →
       </Link>
     </section>

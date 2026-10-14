@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { IconBook, IconDownload, IconExternal } from './Icons'
+import { useEvent } from '../events/EventContext'
 import { useI18n } from '../i18n'
 import { docUrl, downloadUrl, formatBytes, type Doc } from '../lib/documents'
 import { supabase } from '../lib/supabase'
@@ -67,6 +68,7 @@ function BookCard({ d }: { d: Doc }) {
 /** Estante do relatório (documentos PDF). Usada no ecrã "Relatório" da galeria. */
 export default function DocShelf() {
   const { t } = useI18n()
+  const { slug } = useEvent()
   const [docs, setDocs] = useState<Doc[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -77,6 +79,7 @@ export default function DocShelf() {
     supabase
       .from('documents')
       .select('*')
+      .eq('event_slug', slug)
       .eq('hidden', false)
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
@@ -84,7 +87,7 @@ export default function DocShelf() {
         if (error) return setError(true)
         setDocs((data ?? []) as Doc[])
       })
-  }, [])
+  }, [slug])
 
   const shown = useMemo(() => {
     const s = q.trim().toLowerCase()

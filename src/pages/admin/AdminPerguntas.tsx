@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { IconStar, IconThumb } from '../../components/Icons'
 import { useToast } from '../../components/Toast'
 import { useI18n } from '../../i18n'
-import { eventById } from '../../lib/programa'
+import { useEvent } from '../../events/EventContext'
 import { useQuestions } from '../../lib/questions'
 import { supabase, type Question, type QuestionStatus } from '../../lib/supabase'
 
@@ -11,8 +11,10 @@ const TABS: QuestionStatus[] = ['pending', 'approved', 'answered', 'rejected']
 
 export default function AdminPerguntas({ active }: { active: boolean }) {
   const { t, L } = useI18n()
+  const ev = useEvent()
+  const { eventById } = ev.program
   const toast = useToast()
-  const { items, setItems, loading, refresh } = useQuestions(TABS, 'questions-admin')
+  const { items, setItems, loading, refresh } = useQuestions(TABS, 'questions-admin', ev.slug)
   const [tab, setTab] = useState<QuestionStatus>('pending')
   const [newCount, setNewCount] = useState(0)
   const seen = useRef<Set<string> | null>(null)
@@ -41,8 +43,8 @@ export default function AdminPerguntas({ active }: { active: boolean }) {
     // optimista
     setItems((xs) => xs.map((x) => (x.id === q.id ? { ...x, ...p } : p.pinned ? { ...x, pinned: false } : x)))
     if (p.pinned) {
-      // só uma pergunta fixada de cada vez
-      await supabase.from('questions').update({ pinned: false }).eq('pinned', true).neq('id', q.id)
+      // só uma pergunta fixada de cada vez — dentro DESTE evento
+      await supabase.from('questions').update({ pinned: false }).eq('event_slug', ev.slug).eq('pinned', true).neq('id', q.id)
     }
     const { error } = await supabase.from('questions').update(p).eq('id', q.id)
     if (error) toast(error.message, 'error')
@@ -75,7 +77,7 @@ export default function AdminPerguntas({ active }: { active: boolean }) {
             </button>
           ))}
         </div>
-        <Link to="/ecra" target="_blank" className="text-sm font-semibold text-gold-deep underline-offset-4 hover:underline">
+        <Link to={`/${ev.slug}/ecra`} target="_blank" className="text-sm font-semibold text-gold-deep underline-offset-4 hover:underline">
           {t('admin.q.screen')} ↗
         </Link>
       </div>

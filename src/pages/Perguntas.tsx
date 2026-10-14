@@ -2,12 +2,11 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { IconStar, IconThumb } from '../components/Icons'
 import PageHeader from '../components/PageHeader'
 import { useToast } from '../components/Toast'
+import { useEvent } from '../events/EventContext'
 import { useI18n } from '../i18n'
-import { eventById, events } from '../lib/programa'
 import { sortQuestions, useQuestions } from '../lib/questions'
 import { getItem, getJSON, setItem, setJSON } from '../lib/storage'
 import { supabase } from '../lib/supabase'
-import { defaultEventId } from '../lib/time'
 import { Offline } from './Galeria'
 
 const MAX = 400
@@ -18,8 +17,10 @@ const VOTES_KEY = 'pyne.q.votes'
 function AskForm() {
   const { t, L, lang } = useI18n()
   const toast = useToast()
+  const ev = useEvent()
+  const { events, defaultEventId } = ev.program
   const [name, setName] = useState('')
-  const [session, setSession] = useState(defaultEventId)
+  const [session, setSession] = useState(() => defaultEventId())
   const [body, setBody] = useState('')
   const [sending, setSending] = useState(false)
   const [sent, setSent] = useState(false)
@@ -39,6 +40,7 @@ function AskForm() {
       author_name: name.trim().slice(0, 60) || null,
       body: text.slice(0, MAX),
       event_id: session || null,
+      event_slug: ev.slug,
       lang,
     })
     setSending(false)
@@ -105,7 +107,9 @@ function AskForm() {
 export default function Perguntas() {
   const { t, L } = useI18n()
   const toast = useToast()
-  const { items, setItems, loading, error, refresh } = useQuestions(['approved', 'answered'], 'questions-public')
+  const meta = useEvent()
+  const { events, eventById } = meta.program
+  const { items, setItems, loading, error, refresh } = useQuestions(['approved', 'answered'], 'questions-public', meta.slug)
   const [voted, setVoted] = useState<string[]>(() => getJSON<string[]>(VOTES_KEY, []))
   const [filter, setFilter] = useState('')
 

@@ -8,10 +8,12 @@ export function sortQuestions(xs: Question[]) {
 }
 
 /**
- * Lista de perguntas com Realtime. A cada alteração volta a pedir a lista
+ * Perguntas de UM evento, com Realtime. A cada alteração volta a pedir a lista
  * (simples e robusto com RLS: o público só "vê" o que pode ler).
+ * A subscrição é filtrada por event_slug; os DELETE não são filtráveis no Supabase,
+ * por isso chegam à parte e só provocam um refresh desta lista.
  */
-export function useQuestions(statuses: QuestionStatus[], channel: string) {
+export function useQuestions(statuses: QuestionStatus[], channel: string, eventSlug: string) {
   const [items, setItems] = useState<Question[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -23,24 +25,28 @@ export function useQuestions(statuses: QuestionStatus[], channel: string) {
     const { data, error } = await supabase
       .from('questions')
       .select('*')
+      .eq('event_slug', eventSlug)
       .in('status', key.split(','))
       .order('created_at', { ascending: false })
       .limit(500)
     setLoading(false)
     setError(!!error)
     if (!error) setItems(sortQuestions((data ?? []) as Question[]))
-  }, [key])
+  }, [key, eventSlug])
 
   useEffect(() => {
     if (!supabase) return
     const sb = supabase
     refresh()
+    const later = () => {
+      window.clearTimeout(timer.current)
+      timer.current = window.setTimeout(refresh, 250)
+    }
     const ch = sb
-      .channel(channel)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'questions' }, () => {
-        window.clearTimeout(timer.current)
-        timer.current = window.setTimeout(refresh, 250)
-      })
+      .channel(`${channel}-${eventSlug}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'questions', filter: `event_slug=eq.${eventSlug}` }, later)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'questions', filter: `event_slug=eq.${eventSlug}` }, later)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'questions' }, later)
       .subscribe()
     // rede de segurança caso o websocket caia
     const poll = window.setInterval(refresh, 60_000)
@@ -49,7 +55,7 @@ export function useQuestions(statuses: QuestionStatus[], channel: string) {
       window.clearTimeout(timer.current)
       sb.removeChannel(ch)
     }
-  }, [refresh, channel])
+  }, [refresh, channel, eventSlug])
 
   return { items, setItems, loading, error, refresh }
 }

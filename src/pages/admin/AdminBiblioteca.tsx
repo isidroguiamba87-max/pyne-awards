@@ -3,6 +3,7 @@ import imageCompression from 'browser-image-compression'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import { IconBook, IconUpload } from '../../components/Icons'
 import { useToast } from '../../components/Toast'
+import { useEvent } from '../../events/EventContext'
 import { useI18n } from '../../i18n'
 import { DOCS_BUCKET, docUrl, formatBytes, type Doc } from '../../lib/documents'
 import { uploadResumable } from '../../lib/resumableUpload'
@@ -35,6 +36,7 @@ function coverExt(b: Blob) {
 
 export default function AdminBiblioteca() {
   const { t } = useI18n()
+  const { slug } = useEvent()
   const toast = useToast()
   const [pending, setPending] = useState<Pending[]>([])
   const [docs, setDocs] = useState<Doc[]>([])
@@ -47,9 +49,9 @@ export default function AdminBiblioteca() {
 
   const refresh = useCallback(async () => {
     if (!supabase) return
-    const { data } = await supabase.from('documents').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase.from('documents').select('*').eq('event_slug', slug).order('created_at', { ascending: false })
     setDocs((data ?? []) as Doc[])
-  }, [])
+  }, [slug])
 
   useEffect(() => {
     refresh()
@@ -110,6 +112,7 @@ export default function AdminBiblioteca() {
         cover_path: coverPath,
         pages: p.pages,
         bytes: p.file.size,
+        event_slug: slug,
       })
       if (error) throw error
       patch(p.key, { status: 'done' })

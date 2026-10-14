@@ -25,6 +25,7 @@ export interface Photo {
   width: number | null
   height: number | null
   hidden: boolean
+  event_slug: string
 }
 
 export type QuestionStatus = 'pending' | 'approved' | 'answered' | 'rejected'
@@ -39,6 +40,7 @@ export interface Question {
   status: QuestionStatus
   votes: number
   pinned: boolean
+  event_slug: string
 }
 
 export function publicUrl(path: string) {

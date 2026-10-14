@@ -4,9 +4,8 @@ import { IconArrowUp, IconBook, IconClock, IconExternal, IconImage, IconVideo } 
 import Lightbox from '../components/Lightbox'
 import PageHeader from '../components/PageHeader'
 import VideoCard from '../components/VideoCard'
+import { useEvent } from '../events/EventContext'
 import { useI18n } from '../i18n'
-import { groupByMoment } from '../lib/moments'
-import { days, eventById } from '../lib/programa'
 import { publicUrl, supabase, type Photo } from '../lib/supabase'
 import { useVideos } from '../lib/videos'
 
@@ -14,14 +13,14 @@ import { useVideos } from '../lib/videos'
 const DocShelf = lazy(() => import('../components/DocShelf'))
 
 const PAGE = 40
-// Álbum oficial do evento (projecto pyne-album)
-const ALBUM_URL = 'https://fotos.mediacraft.co.mz'
 
+/** "Ver mais fotos": álbum oficial do evento activo (fotos.mediacraft.co.mz/<slug>) */
 function AlbumLink({ className = '' }: { className?: string }) {
   const { t } = useI18n()
+  const { albumUrl } = useEvent()
   return (
     <a
-      href={ALBUM_URL}
+      href={albumUrl}
       target="_blank"
       rel="noopener noreferrer"
       className={`bg-gold-grad inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 font-semibold text-navy shadow-lg shadow-black/20 transition hover:brightness-105 ${className}`}
@@ -43,6 +42,11 @@ const photoTime = (p: Photo) => Date.parse(p.taken_at ?? p.created_at)
 
 export default function Galeria() {
   const { t, L } = useI18n()
+  const ev = useEvent()
+  const { days, eventById, groupByMoment } = ev.program
+  const slug = ev.slug
+  const slugRef = useRef(slug)
+  slugRef.current = slug
   const [day, setDay] = useState<number | null>(null)
   const [photos, setPhotos] = useState<Photo[]>([])
   const [fresh, setFresh] = useState<Set<string>>(new Set())
@@ -54,7 +58,7 @@ export default function Galeria() {
   const sentinel = useRef<HTMLDivElement>(null)
   const dayRef = useRef(day)
   dayRef.current = day
-  const { videos } = useVideos()
+  const { videos } = useVideos(ev)
   // ecrã activo: fotos (padrão) ou vídeos — no URL para o atalho do Início e para partilhar
   const [params, setParams] = useSearchParams()
   const verParam = params.get('ver')
@@ -65,7 +69,13 @@ export default function Galeria() {
     if (!supabase) return
     setLoading(true)
     setError(false)
-    let q = supabase.from('photos').select('*').eq('hidden', false).order('created_at', { ascending: false }).range(from, from + PAGE - 1)
+    let q = supabase
+      .from('photos')
+      .select('*')
+      .eq('event_slug', slug)
+      .eq('hidden', false)
+      .order('created_at', { ascending: false })
+      .range(from, from + PAGE - 1)
     if (d) q = q.eq('day', d)
     const { data, error } = await q
     if (dayRef.current !== d) return // filtro mudou entretanto
@@ -77,7 +87,7 @@ export default function Galeria() {
       return from === 0 ? rows : [...xs, ...rows.filter((r) => !seen.has(r.id))]
     })
     setHasMore(rows.length === PAGE)
-  }, [])
+  }, [slug])
 
   // (re)carregar ao mudar de filtro
   useEffect(() => {
@@ -90,10 +100,10 @@ export default function Galeria() {
   useEffect(() => {
     if (!supabase) return
     const sb = supabase
-    const matches = (p: Photo) => !p.hidden && (dayRef.current === null || p.day === dayRef.current)
-    const ch = sb
-      .channel('photos-public')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'photos' }, (payload) => {
+    // só fotos DESTE evento: novas filtradas no servidor; alterações sem filtro para tirar daqui
+    // uma foto que foi movida/escondida; DELETE não é filtrável no Supabase
+    const matches = (p: Photo) => p.event_slug === slugRef.current && !p.hidden && (dayRef.current === null || p.day === dayRef.current)
+    const onChange = (payload: { eventType: string; new: unknown; old: unknown }) => {
         if (payload.eventType === 'INSERT') {
           const p = payload.new as Photo
           if (!matches(p)) return
@@ -112,12 +122,17 @@ export default function Galeria() {
           const id = (payload.old as { id?: string }).id
           if (id) setPhotos((xs) => xs.filter((x) => x.id !== id))
         }
-      })
+    }
+    const ch = sb
+      .channel(`photos-public-${slug}`)
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'photos', filter: `event_slug=eq.${slug}` }, onChange)
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'photos' }, onChange)
+      .on('postgres_changes', { event: 'DELETE', schema: 'public', table: 'photos' }, onChange)
       .subscribe()
     return () => {
       sb.removeChannel(ch)
     }
-  }, [])
+  }, [slug])
 
   // limpar o aviso quando o utilizador já está no topo
   useEffect(() => {
@@ -157,7 +172,7 @@ export default function Galeria() {
 
   return (
     <>
-      <PageHeader kicker="Pyne Awards Africa 2026" title={t('gallery.title')} sub={t('gallery.sub')}>
+      <PageHeader kicker={ev.shortName} title={t('gallery.title')} sub={t('gallery.sub')}>
         <AlbumLink />
       </PageHeader>
       <div className="mx-auto max-w-6xl px-4">
@@ -192,7 +207,7 @@ export default function Galeria() {
                   ))}
                 </div>
                 {/* dias */}
-                <div className={`-mx-1 flex gap-2 overflow-x-auto px-1 ${view === 'relatorio' ? 'hidden' : ''}`} role="group">
+                <div className={`-mx-1 flex gap-2 overflow-x-auto px-1 ${view === 'relatorio' || days.length < 2 ? 'hidden' : ''}`} role="group">
               {filters.map((f) => (
                 <button
                   key={String(f.v)}

@@ -1,14 +1,21 @@
 import { forwardRef, useEffect, useState } from 'react'
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react'
+import { useEvent } from '../events/EventContext'
 
-// O emblema é embebido como data URL para que o SVG descarregado seja autónomo
-// e o canvas não fique "tainted" ao exportar PNG.
-let cached: string | null = null
-export function useEmblem() {
-  const [src, setSrc] = useState<string | null>(cached)
+// A imagem do centro (do evento activo) é embebida como data URL para que o SVG descarregado
+// seja autónomo e o canvas não fique "tainted" ao exportar PNG.
+const cache = new Map<string, string>()
+
+function useCenterImage(url: string) {
+  const [src, setSrc] = useState<string | null>(cache.get(url) ?? null)
   useEffect(() => {
-    if (cached) return
-    fetch('/pyne-emblem.png')
+    const hit = cache.get(url)
+    if (hit) {
+      setSrc(hit)
+      return
+    }
+    let alive = true
+    fetch(url)
       .then((r) => r.blob())
       .then(
         (b) =>
@@ -20,18 +27,27 @@ export function useEmblem() {
           }),
       )
       .then((d) => {
-        cached = d
-        setSrc(d)
+        cache.set(url, d)
+        if (alive) setSrc(d)
       })
       .catch(() => {})
-  }, [])
+    return () => {
+      alive = false
+    }
+  }, [url])
   return src
 }
 
-function imageSettings(src: string | null, size: number) {
-  if (!src) return undefined
+/** Cores do QR e imagem do centro do evento activo */
+function useQrLook(size: number) {
+  const ev = useEvent()
+  const src = useCenterImage(ev.qrCenter.src)
+  const fg = ev.look === 'light' ? '#183A62' : '#13263D'
+  if (!src) return { fg, image: undefined }
+  // altura ~24% do QR, largura pela proporção da imagem (nível H aguenta a área tapada)
   const h = Math.round(size * 0.24)
-  return { src, height: h, width: Math.round((h * 182) / 437), excavate: true }
+  const w = Math.round((h * ev.qrCenter.width) / ev.qrCenter.height)
+  return { fg, image: { src, height: h, width: w, excavate: true } }
 }
 
 interface Props {
@@ -41,7 +57,7 @@ interface Props {
 }
 
 export const QRSvg = forwardRef<SVGSVGElement, Props>(function QRSvg({ value, size, className }, ref) {
-  const emblem = useEmblem()
+  const { fg, image } = useQrLook(size)
   return (
     <QRCodeSVG
       ref={ref}
@@ -49,9 +65,9 @@ export const QRSvg = forwardRef<SVGSVGElement, Props>(function QRSvg({ value, si
       size={size}
       level="H"
       marginSize={2}
-      fgColor="#13263D"
+      fgColor={fg}
       bgColor="#FFFFFF"
-      imageSettings={imageSettings(emblem, size)}
+      imageSettings={image}
       className={className}
       title={value}
     />
@@ -59,7 +75,7 @@ export const QRSvg = forwardRef<SVGSVGElement, Props>(function QRSvg({ value, si
 })
 
 export const QRCanvas = forwardRef<HTMLCanvasElement, Props>(function QRCanvas({ value, size, className }, ref) {
-  const emblem = useEmblem()
+  const { fg, image } = useQrLook(size)
   return (
     <QRCodeCanvas
       ref={ref}
@@ -67,9 +83,9 @@ export const QRCanvas = forwardRef<HTMLCanvasElement, Props>(function QRCanvas({
       size={size}
       level="H"
       marginSize={4}
-      fgColor="#13263D"
+      fgColor={fg}
       bgColor="#FFFFFF"
-      imageSettings={imageSettings(emblem, size)}
+      imageSettings={image}
       className={className}
     />
   )

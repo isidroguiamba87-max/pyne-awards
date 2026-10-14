@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { IconArrowUp, IconCheck, IconClock, IconExternal, IconPin, IconShirt, IconStar, IconUsers } from '../components/Icons'
+import { IconArrowUp, IconCheck, IconChevronR, IconClock, IconExternal, IconPin, IconShirt, IconStar, IconUsers } from '../components/Icons'
 import { LiveBadge } from '../components/NowCard'
+import { useEvent } from '../events/EventContext'
+import { formatDateRange } from '../events'
 import { useI18n } from '../i18n'
-import { days, events, type Lang, type ProgramEvent } from '../lib/programa'
-import { currentDay, isDone, isLive, slots, useNow, type Slot } from '../lib/time'
+import type { Lang, ProgramEvent, Slot, Speaker } from '../lib/programa'
+import { isDone, isLive, useNow } from '../lib/time'
 import { venueMapUrl } from '../lib/venues'
 
 // ---------- utilitários ----------
@@ -43,11 +45,16 @@ const KIND_STYLE: Record<string, string> = {
   awards: 'bg-gold-grad text-navy ring-gold',
   logistics: 'bg-slate-100 text-slate-600 ring-slate-200',
   excursion: 'bg-teal-50 text-teal-800 ring-teal-200',
+  protocol: 'bg-slate-100 text-slate-600 ring-slate-200',
+  media: 'bg-violet-50 text-violet-800 ring-violet-200',
+  keynote: 'bg-gold-grad text-navy ring-gold',
+  presentation: 'bg-indigo-50 text-indigo-800 ring-indigo-200',
+  break: 'bg-slate-100 text-slate-600 ring-slate-200',
 }
 
 // ---------- componentes ----------
 
-function Person({ name, role, small = false }: { name: string; role: string; small?: boolean }) {
+function Person({ name, role, small = false, note, number }: { name: string; role: string; small?: boolean; note?: string; number?: number }) {
   return (
     <div className="flex items-center gap-3">
       <span
@@ -56,12 +63,41 @@ function Person({ name, role, small = false }: { name: string; role: string; sma
         }`}
         aria-hidden
       >
-        {initials(name)}
+        {number ?? initials(name)}
       </span>
       <div className="min-w-0">
-        <p className="text-sm leading-tight font-semibold text-ink">{name}</p>
+        <p className="text-sm leading-tight font-semibold text-ink">
+          {name}
+          {note && (
+            <span className="ml-1.5 inline-block rounded-full bg-amber-50 px-1.5 py-px align-middle text-[10px] font-semibold tracking-wide text-amber-800 uppercase ring-1 ring-amber-200">
+              {note}
+            </span>
+          )}
+        </p>
         <p className="mt-0.5 text-[13px] leading-snug text-ink-soft">{role}</p>
       </div>
+    </div>
+  )
+}
+
+/** Painel: moderador(a) em destaque + oradores numerados */
+function Panel({ moderator, speakers }: { moderator: Speaker; speakers: Speaker[] }) {
+  const { t, L } = useI18n()
+  return (
+    <div className="mt-3 border-t border-paper-line pt-3">
+      <div className="rounded-xl bg-gold/10 p-3 ring-1 ring-gold/30">
+        <p className="mb-2 text-[10.5px] font-bold tracking-wider text-gold-deep uppercase">{t('agenda.moderator')}</p>
+        <Person name={moderator.name} role={L(moderator.role)} note={moderator.note} />
+      </div>
+      {speakers.length > 0 && (
+        <ol className="mt-3 grid gap-2.5 sm:grid-cols-2">
+          {speakers.map((sp, i) => (
+            <li key={sp.name}>
+              <Person name={sp.name} role={L(sp.role)} note={sp.note} number={i + 1} small />
+            </li>
+          ))}
+        </ol>
+      )}
     </div>
   )
 }
@@ -115,7 +151,7 @@ function ItemRow({ s, t0, last }: { s: Slot; t0: number; last: boolean }) {
 
       {/* linha do tempo */}
       <div className="relative flex justify-center">
-        <span className={`absolute top-0 w-px ${last ? 'h-4' : 'bottom-0'} ${done ? 'bg-paper-line' : 'bg-gradient-to-b from-gold to-gold/30'}`} aria-hidden />
+        <span className={`absolute top-0 w-px ${last ? 'h-4' : 'bottom-0'} ${done ? 'bg-paper-line' : 'timeline-rail'}`} aria-hidden />
         <span
           className={`relative z-10 mt-3 flex h-4 w-4 items-center justify-center rounded-full ${
             live
@@ -157,6 +193,8 @@ function ItemRow({ s, t0, last }: { s: Slot; t0: number; last: boolean }) {
           <p className={`leading-snug font-semibold text-ink ${kind === 'awards' ? 'font-serif text-lg' : 'text-[15px]'}`}>{L(s.item.title)}</p>
           {done && <span className="sr-only">({t('agenda.done')})</span>}
 
+          {s.item.description && <p className="mt-1 text-[13px] leading-relaxed text-ink-soft">{L(s.item.description)}</p>}
+
           {person ? (
             <div className="mt-2.5">
               <Person name={person.name} role={person.role} small />
@@ -165,10 +203,12 @@ function ItemRow({ s, t0, last }: { s: Slot; t0: number; last: boolean }) {
             lead && <p className="mt-1 text-[13px] text-ink-soft">{lead}</p>
           )}
 
-          {s.item.speakers && s.item.speakers.length > 0 && (
+          {s.item.moderator ? (
+            <Panel moderator={s.item.moderator} speakers={s.item.speakers ?? []} />
+          ) : s.item.speakers && s.item.speakers.length > 0 && (
             <div className="mt-3 grid gap-2.5 border-t border-paper-line pt-3 sm:grid-cols-2">
               {s.item.speakers.map((sp) => (
-                <Person key={sp.name} name={sp.name} role={L(sp.role)} />
+                <Person key={sp.name} name={sp.name} role={L(sp.role)} note={sp.note} />
               ))}
             </div>
           )}
@@ -186,7 +226,8 @@ function ItemRow({ s, t0, last }: { s: Slot; t0: number; last: boolean }) {
 
 function EventCard({ ev, t0 }: { ev: ProgramEvent; t0: number }) {
   const { t, L } = useI18n()
-  const own = slots.filter((s) => s.event.id === ev.id)
+  const meta = useEvent()
+  const own = meta.program.slots.filter((s) => s.event.id === ev.id)
   const gala = !!ev.highlight
 
   return (
@@ -207,10 +248,10 @@ function EventCard({ ev, t0 }: { ev: ProgramEvent; t0: number }) {
 
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
-            {ev.subtitle && (
+            {(ev.sessionNumber || ev.subtitle) && (
               <p className={`flex items-center gap-1.5 text-[11px] font-bold tracking-[0.2em] uppercase ${gala ? 'text-gold' : 'text-gold-deep'}`}>
                 {gala && <IconStar className="h-3.5 w-3.5 fill-gold" />}
-                {L(ev.subtitle)}
+                {ev.sessionNumber ? <span className="event-underline">{t('agenda.session', { n: ev.sessionNumber })}</span> : L(ev.subtitle)}
               </p>
             )}
             <h2 className={`mt-2 font-serif leading-[1.1] font-bold ${gala ? 'text-gold-grad text-[1.9rem] md:text-4xl' : 'text-2xl text-ink md:text-3xl'}`}>
@@ -228,15 +269,24 @@ function EventCard({ ev, t0 }: { ev: ProgramEvent; t0: number }) {
           <Chip Icon={IconClock} dark={gala}>
             <span className="font-semibold tabular-nums">{ev.time.replace('–', ' – ')}</span>
           </Chip>
-          <Chip Icon={IconPin} dark={gala} href={venueMapUrl(ev.venue)} label={`${t('agenda.map')}: ${ev.venue}`}>
-            {ev.venue}
-          </Chip>
+          {ev.venue ? (
+            <Chip Icon={IconPin} dark={gala} href={venueMapUrl(ev.venue, meta.venueMaps)} label={`${t('agenda.map')}: ${ev.venue}`}>
+              {ev.venue}
+            </Chip>
+          ) : (
+            <Chip Icon={IconPin} dark={gala}>
+              <span className={gala ? 'text-white/70' : 'text-ink-soft'}>{t('venue.tbc')}</span>
+            </Chip>
+          )}
           {ev.dressCode && (
             <Chip Icon={IconShirt} dark={gala}>
               <span className={gala ? 'text-white/65' : 'text-ink-soft'}>{t('agenda.dress')}:</span> <span className="font-semibold">{L(ev.dressCode)}</span>
             </Chip>
           )}
         </div>
+        {ev.description && (
+          <p className={`mt-3 text-[14px] leading-relaxed ${gala ? 'text-white/80' : 'text-ink-soft'}`}>{L(ev.description)}</p>
+        )}
         {ev.audience && (
           <p className={`mt-3 flex gap-2 text-[13px] leading-relaxed ${gala ? 'text-white/70' : 'text-ink-soft'}`}>
             <IconUsers className={`mt-0.5 h-4 w-4 shrink-0 ${gala ? 'text-gold' : 'text-gold-deep'}`} />
@@ -254,6 +304,16 @@ function EventCard({ ev, t0 }: { ev: ProgramEvent; t0: number }) {
           <ItemRow key={i} s={s} t0={t0} last={i === own.length - 1} />
         ))}
       </ol>
+
+      {ev.topics && (
+        <details className="group border-t border-paper-line px-5 py-4 md:px-7">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold text-ink">
+            <span className="event-underline">{t('agenda.topics')}</span>
+            <IconChevronR className="h-4 w-4 shrink-0 text-gold-deep transition group-open:rotate-90" />
+          </summary>
+          <p className="mt-3 text-[14px] leading-relaxed text-ink-soft">{L(ev.topics)}</p>
+        </details>
+      )}
     </article>
   )
 }
@@ -262,15 +322,17 @@ function EventCard({ ev, t0 }: { ev: ProgramEvent; t0: number }) {
 
 export default function Agenda() {
   const { t, L, lang } = useI18n()
+  const meta = useEvent()
+  const { days, events, slots, currentDay } = meta.program
   const t0 = useNow(30_000)
   const [params, setParams] = useSearchParams()
   const fromUrl = Number(params.get('dia'))
-  const [day, setDay] = useState<number>(() => (fromUrl >= 1 && fromUrl <= 3 ? fromUrl : (currentDay() ?? 1)))
+  const [day, setDay] = useState<number>(() => (fromUrl >= 1 && fromUrl <= days.length ? fromUrl : (currentDay() ?? days[0].day)))
   const today = currentDay(t0)
   const info = days.find((d) => d.day === day)!
   const dayEvents = events.filter((e) => e.day === day)
   const liveHere = slots.some((s) => s.event.day === day && isLive(s, t0))
-  const venues = [...new Set(dayEvents.map((e) => e.venue))]
+  const venues = [...new Set(dayEvents.map((e) => e.venue).filter(Boolean))] as string[]
   const moments = slots.filter((s) => s.event.day === day).length
 
   function choose(d: number) {
@@ -286,13 +348,16 @@ export default function Agenda() {
         <div className="mx-auto max-w-3xl px-4 pt-9 pb-8 md:pt-14 md:pb-10">
           <p className="text-[11px] font-bold tracking-[0.25em] text-gold uppercase md:text-xs">{t('agenda.kicker')}</p>
           <h1 className="mt-2 font-serif text-5xl font-bold md:text-6xl">{t('agenda.title')}</h1>
-          <p className="mt-2 text-white/70">{t('agenda.range')}</p>
+          <p className="mt-2 text-white/70">
+            {formatDateRange(meta, lang)} · {L(meta.city).split(',')[0]}
+          </p>
         </div>
         <div className="gold-rule absolute inset-x-0 bottom-0" aria-hidden />
       </section>
 
       <div className="mx-auto max-w-3xl px-4">
-        {/* selector de dias */}
+        {/* selector de dias (só com mais de um dia) */}
+        {days.length > 1 && (
         <div
           role="tablist"
           aria-label={t('agenda.title')}
@@ -329,6 +394,7 @@ export default function Agenda() {
             )
           })}
         </div>
+        )}
 
         {/* resumo do dia */}
         <div className="mt-5 mb-6 flex flex-wrap items-end justify-between gap-3">
@@ -336,7 +402,7 @@ export default function Agenda() {
             <p className="text-xs font-bold tracking-wider text-gold-deep uppercase">{L(info.label)}</p>
             <h2 className="font-serif text-2xl font-bold text-ink md:text-3xl">{L(info.theme)}</h2>
             <p className="mt-1 text-sm text-ink-soft">
-              {t('agenda.sessions', { n: moments })} · {venues.join(' · ')}
+              {t('agenda.sessions', { n: moments })} · {venues.length ? venues.join(' · ') : t('venue.tbc')}
             </p>
           </div>
           {liveHere && (
