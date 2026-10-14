@@ -63,7 +63,7 @@ async function fetchFrom(client: SupabaseClient | null, source: VideoSource, inc
 
 /**
  * Vídeos de UM evento, mais recentes primeiro, sem repetidos: os do site (filtrados por event_slug)
- * e, só se o evento os tiver (albumVideos), os do projecto do álbum.
+ * e os do projecto do álbum (também filtrados por event_slug).
  */
 export function useVideos(event: { slug: string; albumVideos: boolean }, includeHidden = false) {
   const [videos, setVideos] = useState<Video[]>([])
@@ -72,7 +72,7 @@ export function useVideos(event: { slug: string; albumVideos: boolean }, include
   const refresh = useCallback(async () => {
     const [own, theirs] = await Promise.all([
       fetchFrom(supabase, OWN_SOURCE, includeHidden, event.slug),
-      event.albumVideos ? fetchFrom(other, 'album', includeHidden) : Promise.resolve([]),
+      fetchFrom(other, 'album', includeHidden, event.slug),
     ])
     const seen = new Set<string>()
     const merged = [...own, ...theirs]
